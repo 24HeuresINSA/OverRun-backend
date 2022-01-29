@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  email          String          @unique @db.VarChar(50)
+  username       String          @unique @db.VarChar(50)
+  password       String          @db.VarChar(255)
+  admin          Admin?
+  athlete        Athlete?
+  adminInvite    AdminInvite?
+  passwordInvite PasswordInvite?
+}
+
+model PasswordInvite {
+  id         Int    @id @default(autoincrement())
+  token      String @unique @db.VarChar(100)
+  user       User   @relation(fields: [userId], references: [id])
+  userId     Int    @unique
+  expirateAt BigInt
+}
+
+model Admin {
+  id           Int           @id @default(autoincrement())
+  user         User          @relation(fields: [userId], references: [id])
+  userId       Int           @unique
+  active       Boolean       @default(false)
+  certificates Certificate[]
+}
+
+model AdminInvite {
+  id         Int    @id @default(autoincrement())
+  email      String @unique @db.VarChar(50)
+  token      String @unique @db.VarChar(100)
+  expirateAt BigInt
+  user       User?  @relation(fields: [userId], references: [id])
+  userId     Int?   @unique
+}
+
+model Edition {
+  id                    Int           @id @default(autoincrement())
+  name                  String        @unique @db.VarChar(50)
+  startDate             DateTime
+  endDate               DateTime
+  registrationStartDate DateTime
+  registrationEndDate   DateTime
+  active Boolean
+  inscriptions          Inscription[]
+  va                    VA[]
+}
+
+model Athlete {
+  id          Int           @id @default(autoincrement())
+  user        User          @relation(fields: [userId], references: [id])
+  userId      Int           @unique
+  firstName   String        @db.VarChar(50)
+  lastName    String        @db.VarChar(50)
+  address     String        @db.VarChar(100)
+  zipCode     String        @db.VarChar(50)
+  city        String        @db.VarChar(50)
+  country     String        @default("France")
+  phoneNumber String        @db.VarChar(12)
+  va          VA[]
+  inscription Inscription[]
+  team        Team?         @relation(fields: [teamId], references: [id])
+  teamId      Int?          @unique
+  teamAdmin   TeamAdmin?
+}
+
+model VA {
+  va        Int     @unique
+  athlete   Athlete @relation(fields: [athleteId], references: [id])
+  athleteId Int
+  edition   Edition @relation(fields: [editionId], references: [id])
+  editionId Int
+
+  @@id([va, editionId])
+}
+
+model Inscription {
+  id          Int          @id @default(autoincrement())
+  athlete     Athlete      @relation(fields: [athleteId], references: [id])
+  athleteId   Int
+  edition     Edition      @relation(fields: [editionId], references: [id])
+  editionId   Int
+  race        Race         @relation(fields: [raceId], references: [id])
+  raceId      Int
+  certificate Certificate?
+  payment     Payment?
+  validated   Boolean      @default(false)
+}
+
+model Category {
+  id             Int    @id @default(autoincrement())
+  name           String @db.VarChar(50)
+  description    String @db.MediumText
+  maxTeamMembers Int    @default(1)
+  minTeamMembers Int    @default(1)
+  races          Race[]
+}
+
+model Discipline {
+  id          Int              @id @default(autoincrement())
+  name        String           @db.VarChar(50)
+  description String           @db.MediumText
+  races       RaceDiscipline[]
+}
+
+model Race {
+  id                  Int              @id @default(autoincrement())
+  registrationPrice   Float
+  vaRegistrationPrice Float
+  maxParticipants     Int
+  maxTeams            Int
+  disciplines         RaceDiscipline[]
+  category            Category         @relation(fields: [categoryId], references: [id])
+  categoryId          Int
+  inscriptions        Inscription[]
+  teams               Team[]
+}
+
+model RaceDiscipline {
+  id           Int        @id @default(autoincrement())
+  race         Race       @relation(fields: [raceId], references: [id])
+  raceId       Int
+  discipline   Discipline @relation(fields: [disciplineId], references: [id])
+  disciplineId Int
+  duration     Int
+}
+
+model Certificate {
+  // Status signification
+  // 1: Validated
+  // 2: Being valudated
+  // 3: Seen
+  // 4: Unseen
+  // 5: Rejected
+  id                Int         @id @default(autoincrement())
+  filename          String      @db.VarChar(255)
+  inscription       Inscription @relation(fields: [inscriptionId], references: [id])
+  inscriptionId     Int         @unique
+  uploadedAt        DateTime    @default(now())
+  status            Int         @default(4)
+  statusUpdatedAt   DateTime    @default(now())
+  statusUpdatedBy   Admin?      @relation(fields: [statusUpdatedById], references: [id])
+  statusUpdatedById Int?
+}
+
+model Payment {
+  id            Int         @id @default(autoincrement())
+  inscription   Inscription @relation(fields: [inscriptionId], references: [id])
+  inscriptionId Int         @unique
+  date          DateTime    @default(now())
+  value         Float
+  transaction   String      @db.VarChar(255)
+  filename      String      @db.VarChar(50)
+}
+
+model Team {
+  id       Int         @id @default(autoincrement())
+  name     String      @db.VarChar(50)
+  password String      @db.VarChar(255)
+  members  Athlete[]
+  race     Race        @relation(fields: [raceId], references: [id])
+  raceId   Int
+  admins   TeamAdmin[]
+}
+
+model TeamAdmin {
+  id      Int     @id @default(autoincrement())
+  team    Team    @relation(fields: [teamId], references: [id])
+  teamId  Int
+  admin   Athlete @relation(fields: [adminId], references: [id])
+  adminId Int     @unique
+}
+
+model RefreshToken {
+  id           Int    @id @default(autoincrement())
+  refreshToken String @unique @db.VarChar(1000)
+  expiredAt    BigInt
+}
+
+model BlackListedRefreshToken {
+  id           Int    @id @default(autoincrement())
+  refershToken String @unique @db.VarChar(1000)
+  expiredAt    Int
+}

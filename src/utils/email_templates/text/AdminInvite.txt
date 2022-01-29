@@ -1,0 +1,9 @@
+Salut,
+
+Tu viens d'être invité à rejoindre l'équipe des courses des 24 heures de l'INSA en temps qu'administrateur.
+
+Si ce message t'es bien adressé, rends-toi sur le lien suivant pour finaliser la création de ton compte sur Overun: https://www.24heures.org/token={{ token }}.
+
+Glouglou,
+        
+L'équipe des courses (aka les pédales).

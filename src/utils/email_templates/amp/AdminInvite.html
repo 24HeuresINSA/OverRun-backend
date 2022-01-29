@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html amp4email data-css-strict>
+    
+  <head>
+    <meta charset="utf-8" />
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp4email-boilerplate>
+      body {
+        visibility: hidden;
+      }
+    </style>
+    <style amp-custom>
+      body {
+        font-family: Roboto, sans-serif !important;
+      }
+
+      .bar {
+        background-color: #2b3180;
+      }
+
+      #header {
+        padding: 20px;
+      }
+
+      #main {
+          padding: 20px;
+      }
+
+      #footer {
+        padding: 10px;
+        text-align: center;
+        color: #888;
+        font-size: 14px;
+        line-height: 10px;
+        font-weight: 400;
+      }
+
+      #footer a {
+        text-decoration: none;
+        outline: none;
+        color: white;
+        font-size: 16px;
+      }
+
+      #footer a:hover {
+          color: red;
+      }
+      
+    </style>
+  </head>
+  <body>
+
+    <div id="header" class="bar"></div>
+
+    <div id="main">
+        <p>Salut Jean-Claude.</p>
+
+        <p>Tu viens d'être invité à rejoindre l'équipe des courses des 24 heures de l'INSA en temps qu'administrateur.</p>
+        <p>Si ce message t'es bien adressé, rends-toi sur le lien suivant pour finaliser la création de ton compte sur Overun: <a href="">https://www.24heures.org/{{ token }}</a>.</p>
+        <p>Glouglou,</p>
+        <p>L'équipe des courses (aka les pédales).</p>
+    </div>
+
+    <div id="footer" class="bar">
+      <amp-img
+        src="../images/24h-logo.png"
+        alt="24 heures de l'INSA Logo"
+        width="100"
+        height="100"
+      >
+      </amp-img>
+
+      <p>
+        © 2022
+        <a href="https://www.24heures.org/"><strong>Les 24 heures de l'INSA</strong></a>
+        .
+      </p>
+
+      <p>Tous droits reservés.</p>
+    </div>
+  </body>
+</html>

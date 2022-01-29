@@ -1,0 +1,5 @@
+.env
+db.env
+dist
+node_modules
+prisma/migrations
