@@ -2,6 +2,7 @@ import express from "express";
 import * as disciplineCtrl from "../controllers/disciplines";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
+import { filter } from "../middlewares/filter";
 import { paginate } from "../middlewares/pagination";
 import { search } from "../middlewares/search";
 
@@ -11,6 +12,9 @@ disciplineRouter.get(
     "/disciplines",
     authenticateJWT,
     accessControl(["ADMIN"]),
+    filter([
+        [["editonId", "id"], "number", true, ["edition", "id"]],
+    ]),
     search([
         ["name", "string", false],
     ]),

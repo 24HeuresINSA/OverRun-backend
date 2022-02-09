@@ -52,6 +52,7 @@ const adminSelectedFields = {
       validated: true,
     },
   },
+  teamId: true,
   // team: {
   //   select: {
   //     id: true,
@@ -216,7 +217,6 @@ export const updateAthlete = async (req: Request, res: Response) => {
 export const deleteAthlete = async (req: Request, res: Response) => {
   console.log(deleteAthlete);
   const athleteId = parseInt(req.params.id);
-
   try {
     await prisma.athlete.delete({
       where: {

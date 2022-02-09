@@ -13,10 +13,11 @@ categoryRouter.get(
     authenticateJWT,
     accessControl(["ADMIN"]),
     filter([
-        ["id", "number", true],
+        ["id", "number", false],
+        [["editionId", "id"], "number", true, ["edition", "id"]],
     ]),
     search([
-        []
+        ["name", "string", false],
     ]),
     paginate(10),
     categoryCtrl.getCategories

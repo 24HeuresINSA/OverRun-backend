@@ -10,6 +10,12 @@ const selectedFields = {
         select: {
             raceId: true,
         }
+    },
+    edition: {
+        select: {
+            id: true, 
+            name: true
+        }
     }
 };
 
@@ -17,15 +23,17 @@ export const getDisciplines = async (
     req: Request, 
     res: Response,
 ) => {
+    console.log(getDisciplines);
     try {
         const disciplines = await prisma.discipline.findMany({
             skip: req.paginate.skipIndex,
-            take: req.paginate.limit,
-            where: req.search,
+            take: req.paginate.limit + 1,
+            where: Object.assign({}, req.search, req.filter),
             select: selectedFields,
         }); 
         res.json(jsonPaginateResponse(disciplines, req));
-    } catch (e) {
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -37,6 +45,7 @@ export const getDisciplineById = async (
     req: Request, 
     res: Response
 ) => {
+    console.log(getDisciplineById);
     const disciplineId = parseInt(req.params.id);
     try {
         const discipline = await prisma.discipline.findUnique({
@@ -46,7 +55,8 @@ export const getDisciplineById = async (
             select: selectedFields,
         });
         res.json(discipline);
-    } catch(e) {
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -58,13 +68,20 @@ export const createDiscipline = async (
     req: Request, 
     res: Response
 ) => {
+    console.log(createDiscipline);
+    const { name, description, editionId} = req.body;
     try {
         const discipline = await prisma.discipline.create({
-            data: req.body,
+            data: {
+                name: name,
+                description: description,
+                editionId: editionId
+            },
             select: selectedFields,
         }); 
         res.json(discipline);
-    } catch (e) {
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -103,7 +120,7 @@ export const deleteDiscipline = async (
 ) => {
     const disciplineId = parseInt(req.params.id);
     try {
-        const discipline = await prisma.discipline.delete({
+        await prisma.discipline.delete({
             where: {
                 id: disciplineId,
             }, 
@@ -114,7 +131,8 @@ export const deleteDiscipline = async (
         res.json({
           success: "Discipline deleted successfully.",
         });
-    } catch(e) {
+    } catch (err) {
+        console.error(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'

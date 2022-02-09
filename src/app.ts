@@ -10,6 +10,9 @@ import { adminInvitationRouter } from "./routes/adminInvitations";
 import { categoryRouter } from "./routes/categories";
 import { disciplineRouter } from "./routes/disciplines";
 import { athleteRouter } from "./routes/athletes";
+import { teamRouter } from "./routes/teams";
+import { raceRouter } from "./routes/races";
+import { editionRouter } from "./routes/editions";
 
 export const app = express();
 
@@ -42,5 +45,8 @@ app.use(PATH, adminInvitationRouter);
 app.use(PATH, categoryRouter);
 app.use(PATH, disciplineRouter);
 app.use(PATH, athleteRouter);
+app.use(PATH, teamRouter);
+app.use(PATH, raceRouter);
+app.use(PATH, editionRouter);
 app.use(PATH, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

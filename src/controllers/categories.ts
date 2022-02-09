@@ -11,14 +11,22 @@ export const selectedFields = {
     races: {
         select: {
             id: true,
+            name: true,
         },
     },
+    edition: {
+        select: {
+            id: true,
+            name: true,
+        }
+    }
 };
 
 export const getCategories = async (
     req: Request, 
     res: Response
 ) => {
+    console.log(getCategories); 
     try {
         const categories = await prisma.category.findMany({
           select: selectedFields,
@@ -27,7 +35,8 @@ export const getCategories = async (
           where: Object.assign({}, req.search, req.filter),
         }); 
         res.json(jsonPaginateResponse(categories, req));
-    } catch(e) {
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -39,6 +48,7 @@ export const getCategoryById = async (
     req: Request, 
     res: Response
 ) => {
+    console.log(getCategoryById);
     const categoryId = parseInt(req.params.id);
     try {
         const category = await prisma.category.findUnique({
@@ -48,7 +58,8 @@ export const getCategoryById = async (
             select: selectedFields,
         }); 
         res.json(category);
-    } catch (e) {
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -60,19 +71,22 @@ export const createCategroy = async (
     req: Request, 
     res: Response
 ) => {
-    const {name, description, maxTeamMembers, minTeamMembers} = req.body;
+    console.log(createCategroy);
+    const {name, description, maxTeamMembers, minTeamMembers, editionId} = req.body;
     try {
         const category = await  prisma.category.create({
             data: {
                 name: name, 
                 description: description, 
                 maxTeamMembers: maxTeamMembers,
-                minTeamMembers: minTeamMembers
+                minTeamMembers: minTeamMembers, 
+                editionId: editionId,
             },
             select: selectedFields,
         });
         res.json(category);
-    } catch(e){
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -84,23 +98,28 @@ export const updateCategory = async (
     req: Request, 
     res: Response
 ) => {
+    console.log(updateCategory);
     const categoryId = parseInt(req.params.id);
-    if (req.body.id) {
-        delete req.body.id;
-    }
-
-    if (req.body.races) {
-        delete req.body.races;
-    }
-    try{
-        const category = await prisma.category.update({
+    const { description, minTeamMembers, maxTeamMembers } = req.body;
+    try {
+        const category = await prisma.category.findUnique({
+            where: {
+                id: categoryId,
+            },
+        }); 
+        const data = {
+            description: description !== null ? description : category?.description,
+            minTeamMembers: minTeamMembers !== null ? minTeamMembers : category?.minTeamMembers, 
+            maxTeamMembers: maxTeamMembers !== null ? maxTeamMembers : category?.maxTeamMembers
+        }
+        const updatedCategory = await prisma.category.update({
             where: {
                 id:categoryId,
             },
-            data: req.body,
+            data: data,
             select: selectedFields,
         });
-        res.json(category);
+        res.json(updatedCategory);
     } catch (err) {
         console.log(err);
         res.status(500);

@@ -2,6 +2,7 @@ import { Request } from "express";
 
 
 export const jsonPaginateResponse = (array: Array<any>, req: Request) => {
+    console.log(array.length)
     return {
         data:
             array.length > req.paginate.limit

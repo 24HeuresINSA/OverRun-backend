@@ -25,27 +25,6 @@ const selectedFields = {
     },
 };
 
-export const getVAs = async (
-    req: Request,
-    res: Response
-) => {
-    console.log(getVAs);
-    try {
-        const VAs = await prisma.vA.findMany({
-            where: req.search,
-            skip: req.paginate.skipIndex,
-            take: req.paginate.limit,
-            select: selectedFields
-        });
-        res.json(VAs)
-    } catch (err) {
-        res.status(500);
-        res.json({
-            err: "Internal error.",
-        });
-    }
-};
-
 export const checkVA = async(
     req: Request, 
     res: Response

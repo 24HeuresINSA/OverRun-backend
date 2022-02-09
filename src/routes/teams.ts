@@ -2,6 +2,7 @@ import express from "express";
 import * as teamCtrl from "../controllers/teams"
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
+import { filter } from "../middlewares/filter";
 import { paginate } from "../middlewares/pagination";
 import { search } from "../middlewares/search";
 
@@ -11,6 +12,9 @@ teamRouter.get(
     "/teams",
     authenticateJWT,
     accessControl(["ADMIN"]),
+    filter([
+        [["editionId", "id"], "number", true, ["edition", "id"]],
+    ]),
     search([
         ["name", "string", false]
     ]),
@@ -50,15 +54,21 @@ teamRouter.post(
 );
 
 teamRouter.post(
-    "/teams/:id/addAdmin",
+    "/teams/:id/admin",
     authenticateJWT,
     teamCtrl.addTeamAdmin
 );
 
 teamRouter.post(
-    "/teams/:id/removeAdmin",
+    "/teams/:id/removeAdmin/",
     authenticateJWT,
     teamCtrl.removeTeamAdmin
+);
+
+teamRouter.post(
+    "/teams/:id/removeMember",
+    authenticateJWT,
+    teamCtrl.removeTeamMember
 );
 
 teamRouter.post(

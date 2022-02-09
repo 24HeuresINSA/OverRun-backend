@@ -18,14 +18,12 @@ const selectedFields = {
 export const getAdmins = async (req: Request, res: Response) => {
   try {
     console.log(getAdmins);
-    console.log(Object.assign({}, req.search, req.filter));
     const admins = await prisma.admin.findMany({
       select: selectedFields,
       skip: req.paginate.skipIndex,
       take: req.paginate.limit + 1,
       where: Object.assign({}, req.search, req.filter),
     });
-    console.log(admins);
     res.json(jsonPaginateResponse(admins, req));
   } catch (err) {
     console.error(err);
