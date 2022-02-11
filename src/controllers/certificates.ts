@@ -1,41 +1,65 @@
 import { Request, Response } from "express";
 import { prisma } from "../server";
-import { UploadedFile } from "express-fileupload"
-import path from "path";
+import fs from "fs";
+import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
+import fileUpload from "express-fileupload";
 
 const selectedFields = {
-        id: true,
-        filename: true, 
-        athlete: {
-            select: {
-                id: true, 
-                email: true,
-                pseudo: true, 
-                firstName: true, 
-                lastName: true
+  id: true,
+    filename: true,
+    inscription: {
+        select: {
+            id: true,
+            athlete: {
+                select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    user: {
+                        select: {
+                            id: true, 
+                            username: true, 
+                            email: true,
+                        },
+                    },
+                },
             },
-        },
-        uploadedAt: true, 
-        status: true,
-        statusUpdatedAt: true,
-        statusUpdatedBy: {
-            select: {
-                id: true, 
-                pseudo: true,
+      },
+  },
+  uploadAt: true,
+  status: true,
+  statusUpdatedAt: true,
+    statusUpdatedBy: {
+        select: {
+            id: true,
+            user: {
+                select: {
+                    id: true,
+                    username: true, 
+                    email: true
+                },
             },
-        },
-}
+      },
+  },
+};
+
+const path = "../../uploads/certificates/";
 
 export const getCertificates = async(
     req: Request,
     res: Response
 ) => {
-    try{
+    console.log(getCertificates)
+    try {
         const certificates = await prisma.certificate.findMany({
-            select: selectedFields,
+            skip: req.paginate.skipIndex,
+            take: req.paginate.limit + 1,
+            where: req.search, 
+            select: selectedFields
         });
-        res.json(certificates);
-    } catch(e){
+        res.json(jsonPaginateResponse(certificates, req));
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -47,91 +71,89 @@ export const uploadCertificate = async(
     req: Request, 
     res: Response
 ) => {
-
-    if (!req.files) {
-        res.status(400)
-        res.json({
-            'err': "No files were uploaded."
-        });
-    }
-
-    const certificate = req.files.certificate as UploadedFile;
-    const extensionName = path.extname(certificate.name);
-    const allowedExtension = ['.png', '.jpg', '.jpeg'];
-
-    if(!allowedExtension.includes(extensionName)){
-        res.status(422); 
-        res.json({
-            'err': "Invalid file format."
-        })
-    }
-
-    const athleteId = parseInt(req.params.id)
-
+    console.log(uploadCertificate);
+    const { editionId } = req.body;
     try {
-        const athlete = await prisma.athlete.findUnique({
-            where: {
-                id: athleteId
-            }, 
-            select: {
-                id: true,
-                firstName: true, 
-                lastName: true,
-            },
-        });
-        const filename = athlete.id + "_" + athlete.firstName.toUpperCase + "_" + athlete.lastName.toUpperCase + extensionName;
-        const path = __dirname + "../../public/certificates/" + filename;
-
-        certificate.mv(path, async (err) => {
-           if(err) {
-            res.status(500);
-            res.json({
-                'err': 'Internal error.'
+        if (req.files) {
+            const inscription = await prisma.inscription.findFirst({
+                where: {
+                    athlete: {
+                        is: {
+                            userId: req.user.id,
+                        },
+                    },
+                    editionId: editionId
+                },
             });
-           }
-           const certificate = await prisma.certificate.upsert({
-               where: {
-                athleteId: athleteId,
-               },
-               create: {
-                   filename: filename,
-                   athlete: {
-                       connect: {
-                           id: athlete.id,
-                       }
-                   },
-               }, 
-               update: {
-                    filename: filename,
-               },
-               select: {
-                   id: true,
-                   filename: true,
-                   athlete: {
-                       select: {
-                           id: true,
-                           email: true,
-                           pseudo: true,
-                           firstName: true, 
-                           lastName: true,
-                       },
-                   },
-               },
-           });
-           res.json(certificate);
-        })
-    } catch (e) {
+            if (inscription !== null) {
+                const certificate_file = req.files
+                  ?.certificate as fileUpload.UploadedFile;
+                const filename = Date.now().toString() + ".jpeg";
+                certificate_file.mv(path + filename);
+                    
+                const certificate = await prisma.certificate.findUnique({
+                    where: {
+                        inscriptionId: inscription.id,
+                    },
+                    select: selectedFields,
+                });
+                if (certificate !== null) {
+                    try {
+                        fs.unlinkSync(path + certificate.filename);
+                    } catch (err) {
+                        console.error(err);
+                    }
+                    res.json(await prisma.certificate.update({
+                        where: {
+                            id: certificate.id,
+                        },
+                        data: {
+                            filename: filename,
+                            status: 4,
+                            statusUpdatedAt: null,
+                            statusUpdatedById: null
+                        },
+                        select: selectedFields,
+                    })
+                    )
+                } else {
+                    res.json(
+                        await prisma.certificate.create({
+                            data: {
+                                filename: filename,
+                                inscriptionId: inscription.id,
+                                status: 4
+                            },
+                            select: selectedFields
+                        })
+                    )
+                }
+                
+            } else {
+                res.status(400);
+                res.json({
+                    err: "Athlete must be registered to submit a certificate."
+                });
+            }
+        } else {
+            res.status(400);
+            res.json({
+                err: "No files uploaded"
+            })
+        }
+    } catch (err) {
         res.status(500);
         res.json({
-            'err': 'Internal error.'
-        });
+            err: "Internal error",
+        })
     }
-};
+}
 
 export const getCertificateImage = async (
     req: Request,
     res: Response
 ) => {
+    console.log(getCertificateImage);
     const certificateId = parseInt(req.params.id);
     try {
         const certificate = await prisma.certificate.findUnique({
@@ -143,7 +165,7 @@ export const getCertificateImage = async (
                 filename: true,
             },
         }); 
-        const filePath = __dirname + "../../public/certificates/" + certificate.filename;
+        const filePath = __dirname + path + certificate?.filename;
         res.sendFile(filePath);
     } catch (e) {
         res.status(500);
@@ -157,6 +179,7 @@ export const getCertificateData = async (
     req: Request, 
     res: Response
 ) => {
+    console.log(getCertificateData);
     const certificateId = parseInt(req.params.id);
     try {
         const certificate = await prisma.certificate.findUnique({
@@ -166,7 +189,8 @@ export const getCertificateData = async (
             select: selectedFields,
         });
         res.json(certificate);
-    }catch(e){
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -179,7 +203,7 @@ export const updateCertificateStatus = async (
     res: Response
 ) => {
     const certificateId = parseInt(req.params.id);
-    const status = parseInt(req.body.status);
+    const { status } = req.body;
     try{
         const certificate = await prisma.certificate.update({
             where: {
@@ -190,7 +214,8 @@ export const updateCertificateStatus = async (
             }
         });
         res.json(certificate);
-    }catch(e){
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
@@ -199,32 +224,39 @@ export const updateCertificateStatus = async (
 };
 
 export const getCertificateStatus = async (
-    req: Request, 
+    req: Request,
     res: Response
 ) => {
-    const certificateId = parseInt(req.params.id); 
+    const certificateId = parseInt(req.params.id);
     try {
         const certificate = await prisma.certificate.findUnique({
             where: {
                 id: certificateId,
             },
             select: {
-                id: true, 
-                status: true, 
-                statusUpdatedAt: true, 
+                id: true,
+                status: true,
+                statusUpdatedAt: true,
                 statusUpdatedBy: {
                     select: {
-                        id: true, 
-                        pseudo: true,
+                        id: true,
+                        user: {
+                            select: {
+                                id: true,
+                                username: true,
+                                email: true,
+                            },
+                        },
                     },
                 },
             },
-        }); 
+        });
         res.json(certificate);
-    } catch (e) {
+    } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             'err': 'Internal error.'
         });
     }
-}
+};

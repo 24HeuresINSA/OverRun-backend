@@ -157,7 +157,7 @@ model Certificate {
   inscriptionId     Int         @unique
   uploadedAt        DateTime    @default(now())
   status            Int         @default(4)
-  statusUpdatedAt   DateTime    @default(now())
+  statusUpdatedAt   DateTime?   @default(now())
   statusUpdatedBy   Admin?      @relation(fields: [statusUpdatedById], references: [id], onDelete: SetNull)
   statusUpdatedById Int?
 }
