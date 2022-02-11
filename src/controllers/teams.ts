@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import { prisma, saltRounds } from "../server";
 import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
-import { rmSync } from "fs";
-import { identify } from "imagemagick";
 
 const selectedFields = {
   id: true,
