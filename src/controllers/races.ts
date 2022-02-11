@@ -4,7 +4,7 @@ import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 
 
 const selectedFields = {
-    id: true, 
+    id: true,
     name: true,
     registrationPrice: true,
     vaRegistrationPrice: true,
@@ -14,24 +14,20 @@ const selectedFields = {
         select: {
             discipline: {
                 select: {
-                    id: true, 
-                    name: true, 
-                    description: true
+                    id: true,
+                    name: true,
                 }
             },
             duration: true,
         }
-    }, 
+    },
     category: {
         select: {
             id: true,
             name: true,
-            description: true, 
-            maxTeamMembers: true,
-            minTeamMembers: true
-        }
-    }
-}
+        },
+    },
+};
 
 export const getRaces = async (
     req: Request, 
@@ -184,12 +180,13 @@ export const updateRace = async (
                 data.categoryId = race.categoryId;
             }
         }
-        await prisma.raceDiscipline.deleteMany({
-            where: {
-                raceId: raceId
-            }
-        });
+       
         if (disciplineIds.length > 0) {
+             await prisma.raceDiscipline.deleteMany({
+               where: {
+                 raceId: raceId,
+               },
+             });
           for (const discipline of disciplineIds) {
             const DBdiscipline = await prisma.discipline.findUnique({
               where: {
@@ -225,12 +222,12 @@ export const updateRace = async (
 
 };
 
-export const deleteRace = async(
-    req: Request, 
+export const deleteRace = async (
+    req: Request,
     res: Response
 ) => {
     console.log(deleteRace);
-    const raceId = parseInt(req.params.id); 
+    const raceId = parseInt(req.params.id);
     try {
         await prisma.race.delete({
             where: {
@@ -244,9 +241,7 @@ export const deleteRace = async(
         console.log(err);
         res.status(500);
         res.json({
-          err: "Internal error.",
+            err: "Internal error.",
         });
     }
-}
-
-
+};

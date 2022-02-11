@@ -55,7 +55,6 @@ model Edition {
   registrationEndDate   DateTime
   active                Boolean
   inscriptions          Inscription[]
-  vas                   VA[]
   races                 Race[]
   disciplines           Discipline[]
   categories            Category[]
@@ -63,44 +62,41 @@ model Edition {
 }
 
 model Athlete {
-  id          Int           @id @default(autoincrement())
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int           @unique
-  firstName   String        @db.VarChar(50)
-  lastName    String        @db.VarChar(50)
-  address     String        @db.VarChar(100)
-  zipCode     String        @db.VarChar(50)
-  city        String        @db.VarChar(50)
-  country     String        @default("France")
-  phoneNumber String        @db.VarChar(12)
-  va          VA[]
-  inscription Inscription[]
-  team        Team?         @relation(fields: [teamId], references: [id])
-  teamId      Int?
-  teamAdmin   TeamAdmin?
-}
-
-model VA {
-  va        Int     @unique
-  athlete   Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
-  athleteId Int
-  edition   Edition @relation(fields: [editionId], references: [id], onDelete: Cascade)
-  editionId Int
-
-  @@id([va, editionId])
+  id           Int           @id @default(autoincrement())
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int           @unique
+  firstName    String        @db.VarChar(50)
+  lastName     String        @db.VarChar(50)
+  address      String        @db.VarChar(100)
+  zipCode      String        @db.VarChar(50)
+  city         String        @db.VarChar(50)
+  country      String        @default("France")
+  phoneNumber  String        @db.VarChar(12)
+  inscriptions Inscription[]
 }
 
 model Inscription {
   id          Int          @id @default(autoincrement())
-  athlete     Athlete?     @relation(fields: [athleteId], references: [id], onDelete: SetNull)
-  athleteId   Int?
+  athlete     Athlete      @relation(fields: [athleteId], references: [id])
+  athleteId   Int
   edition     Edition      @relation(fields: [editionId], references: [id])
   editionId   Int
-  race        Race?        @relation(fields: [raceId], references: [id], onDelete: SetNull)
-  raceId      Int?
+  race        Race         @relation(fields: [raceId], references: [id])
+  raceId      Int
+  team        Team?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  teamId      Int?
+  teamAdmin   TeamAdmin?
+  va          VA?
   certificate Certificate?
   payment     Payment?
   validated   Boolean      @default(false)
+}
+
+model VA {
+  id            Int         @id @default(autoincrement())
+  va            String      @db.VarChar(1000)
+  inscription   Inscription @relation(fields: [inscriptionId], references: [id])
+  inscriptionId Int         @unique
 }
 
 model Category {
@@ -125,7 +121,7 @@ model Discipline {
 
 model Race {
   id                  Int              @id @default(autoincrement())
-  name                String
+  name                String           @unique
   registrationPrice   Float
   vaRegistrationPrice Float
   maxParticipants     Int
@@ -157,12 +153,12 @@ model Certificate {
   // 5: Rejected
   id                Int         @id @default(autoincrement())
   filename          String      @db.VarChar(255)
-  inscription       Inscription @relation(fields: [inscriptionId], references: [id])
+  inscription       Inscription @relation(fields: [inscriptionId], references: [id], onDelete: Cascade)
   inscriptionId     Int         @unique
   uploadedAt        DateTime    @default(now())
   status            Int         @default(4)
   statusUpdatedAt   DateTime    @default(now())
-  statusUpdatedBy   Admin?      @relation(fields: [statusUpdatedById], references: [id])
+  statusUpdatedBy   Admin?      @relation(fields: [statusUpdatedById], references: [id], onDelete: SetNull)
   statusUpdatedById Int?
 }
 
@@ -177,23 +173,23 @@ model Payment {
 }
 
 model Team {
-  id        Int         @id @default(autoincrement())
-  name      String      @db.VarChar(50) @unique
-  password  String      @db.VarChar(255)
-  members   Athlete[]
-  race      Race        @relation(fields: [raceId], references: [id])
+  id        Int           @id @default(autoincrement())
+  name      String        @unique @db.VarChar(50)
+  password  String        @db.VarChar(255)
+  members   Inscription[]
+  race      Race          @relation(fields: [raceId], references: [id])
   raceId    Int
   admins    TeamAdmin[]
-  edition   Edition     @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  edition   Edition       @relation(fields: [editionId], references: [id], onDelete: Cascade)
   editionId Int
 }
 
 model TeamAdmin {
-  id      Int     @id @default(autoincrement())
-  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId  Int
-  admin   Athlete @relation(fields: [adminId], references: [id])
-  adminId Int     @unique
+  id                 Int         @id @default(autoincrement())
+  team               Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId             Int
+  adminInscription   Inscription @relation(fields: [adminInscriptionId], references: [id])
+  adminInscriptionId Int         @unique
 }
 
 model RefreshToken {

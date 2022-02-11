@@ -69,7 +69,7 @@ export const activateAdmin = async (req: Request, res: Response) => {
         active: (activate) ? activate : !adminData?.active
       },
       select: selectedFields
-    }); 
+    });
     res.json(admin);
   } catch (err) {
     console.log(err);
@@ -78,12 +78,12 @@ export const activateAdmin = async (req: Request, res: Response) => {
       err: "Internal error.",
     });
   }
-}
+};
 
 export const deleteAdmin = async (req: Request, res: Response) => {
   const adminId = parseInt(req.params.id);
   try {
-    const admin = await prisma.admin.delete({
+    await prisma.admin.delete({
       where: {
         id: adminId,
       },

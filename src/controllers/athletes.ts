@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 import { login } from "./login";
 
-const adminSelectedFields = {
+const selectedFields = {
   id: true,
   user: {
     select: {
@@ -20,45 +20,6 @@ const adminSelectedFields = {
   city: true,
   country: true,
   phoneNumber: true,
-  inscription: {
-    select: {
-      id: true,
-      edition: true,
-      race: true,
-      certificate: {
-        select: {
-          id: true,
-          status: true,
-          statusUpdatedAt: true,
-          statusUpdatedBy: {
-            select: {
-              id: true,
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  username: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      payment: {
-        select: {
-          id: true,
-        },
-      },
-      validated: true,
-    },
-  },
-  teamId: true,
-  // team: {
-  //   select: {
-  //     id: true,
-  //     name: true,
-  //   },
-  // },
 };
 
 export const getAthletes = async (req: Request, res: Response) => {
@@ -68,7 +29,7 @@ export const getAthletes = async (req: Request, res: Response) => {
       skip: req.paginate.skipIndex,
       take: req.paginate.limit,
       where: Object.assign({}, req.filter, req.search),
-      select: adminSelectedFields,
+      select: selectedFields,
     });
     res.json(jsonPaginateResponse(athletes, req));
   } catch (err) {
@@ -89,7 +50,7 @@ export const getAthleteById = async (req: Request, res: Response) => {
         where: {
           id: athleteId,
         },
-        select: adminSelectedFields,
+        select: selectedFields,
       });
       res.json(athlete);
     } else {
@@ -98,7 +59,7 @@ export const getAthleteById = async (req: Request, res: Response) => {
           id: athleteId,
           userId: req.user.id,
         },
-        select: adminSelectedFields,
+        select: selectedFields,
       });
       res.json(athlete);
     }
@@ -156,12 +117,12 @@ export const createAthlete = async (req: Request, res: Response) => {
           country: country,
           phoneNumber: phoneNumber,
         },
-        select: adminSelectedFields,
+        select: selectedFields,
       });
       login(req, res);
       res.json(athlete);
-    } catch (err) {
-      console.log(err);
+    } catch (e) {
+      console.log(e);
       res.status(500);
       res.json({
         err: "Internal error.",
@@ -172,26 +133,29 @@ export const createAthlete = async (req: Request, res: Response) => {
 
 export const updateAthlete = async (req: Request, res: Response) => {
   console.log(updateAthlete);
-
   const athleteId = parseInt(req.params.id);
-  if (req.body.user) {
-    delete req.body.user;
-  }
-  if (req.body.teamId) {
-    delete req.body.teamId;
-  }
-  if (req.body.inscription) {
-    delete req.body.inscription
-  }
-    
+  const { firstName, lastName, address, zipCode, city, country, phoneNumber } = req.body;
   try {
+    const athleteData = await prisma.athlete.findUnique({
+      where: {
+        id: athleteId,
+      },
+    })
     if (req.user.role.includes("ADMIN")) {
       const athlete = await prisma.athlete.update({
         where: {
           id: athleteId,
         },
-        data: req.body,
-        select: adminSelectedFields,
+        data: {
+          firstName: firstName !== null ? firstName : athleteData?.firstName, 
+          lastName: lastName !== null ? lastName : athleteData?.lastName, 
+          address: address !== null ? address: athleteData?.address, 
+          zipCode: zipCode !== null ? zipCode : athleteData?.zipCode, 
+          city: city !== null ? city : athleteData?.city, 
+          country: country !== null ? country : athleteData?.country,
+          phoneNumber: phoneNumber !== null ? phoneNumber : athleteData?.phoneNumber
+        },
+        select: selectedFields,
       });
       res.json(athlete);
     } else {
@@ -200,8 +164,16 @@ export const updateAthlete = async (req: Request, res: Response) => {
           id: athleteId,
           userId: req.user.id,
         },
-        data: req.body,
-        select: adminSelectedFields,
+        data: {
+          firstName: firstName !== null ? firstName : athleteData?.firstName,
+          lastName: lastName !== null ? lastName : athleteData?.lastName,
+          address: address !== null ? address : athleteData?.address,
+          zipCode: zipCode !== null ? zipCode : athleteData?.zipCode,
+          city: city !== null ? city : athleteData?.city,
+          country: country !== null ? country : athleteData?.country,
+          phoneNumber: phoneNumber !== null ? phoneNumber : athleteData?.phoneNumber,
+        },
+        select: selectedFields,
       });
       res.json(athlete);
     }

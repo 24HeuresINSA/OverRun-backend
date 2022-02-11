@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { prisma, saltRounds } from "../server";
 import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
+import { rmSync } from "fs";
+import { identify } from "imagemagick";
 
 const selectedFields = {
   id: true,
@@ -9,28 +11,34 @@ const selectedFields = {
   members: {
     select: {
       id: true,
-      user: {
+      athlete: {
         select: {
-          id: true,
-          username: true,
-          email: true,
+          id: true, 
+          user: {
+            select: {
+              id: true,
+              username: true,
+              email: true
+            },
+          },
+          firstName: true,
+          lastName: true,
         },
       },
     },
   },
-  race: true,
+  race: {
+    select: {
+      id: true, 
+      name:true,
+    }
+  },
   admins: {
     select: {
       id: true,
       admin: {
         select: {
           id: true,
-          user: {
-            select: {
-              username: true,
-              email: true,
-            },
-          },
         },
       },
     },
@@ -87,54 +95,135 @@ export const createTeam = async (req: Request, res: Response) => {
   const { name, password, raceId, editionId } = req.body;
   bcrypt.hash(password, saltRounds, async (err, hash) => {
     try {
-      console.log("Felool", req.user.id);
-      const athlete = await prisma.athlete.findUnique({
+      const edition = await prisma.edition.findUnique({
         where: {
-          userId: req.user.id,
+          id: editionId,
         },
       });
-      if (athlete !== null) {
-        if (athlete.teamId === null) {
-          const team = await prisma.team.create({
-            data: {
-              name: name,
-              password: hash,
-              members: {
-                connect: {
-                  id: athlete.id,
-                },
+      if (edition !== null && edition.active === true) {
+        const race = await prisma.race.findUnique({
+          where: {
+            id: raceId,
+          },
+          include: {
+            category: true
+          },
+        });
+        if (race !== null && race.editionId === edition.id) {
+          const athlete = await prisma.athlete.findUnique({
+            where: {
+              userId: req.user.id,
+            },
+          }); 
+          if (athlete !== null) {
+            let inscription = await prisma.inscription.findFirst({
+            where: {
+              athlete: {
+                is: {
+                  userId: req.user.id,
+                }
               },
-              raceId: raceId,
-              editionId: editionId,
-            },
-            select: selectedFields,
-          });
-          await prisma.teamAdmin.create({
-            data: {
-              teamId: team.id,
-              adminId: athlete.id,
-            },
-          });
-          res.json(
-            await prisma.team.findUnique({
+              editionId: edition.id
+            }
+            });
+            const teams = await prisma.team.findMany({
               where: {
-                id: team.id,
+                raceId: race.id,
               },
-              select: selectedFields,
+            });
+            if (teams.length < race.maxTeams) {
+              let createNewTeam = false;
+            
+          if (inscription !== null) {
+            if (inscription.teamId === null) {
+              if (inscription.raceId === race.id) {
+                createNewTeam = true;
+              } else {
+                res.status(400);
+                res.json({
+                  "err": "Athlete is registered in another race."
+                });
+              }
+            } else {
+              res.status(400); 
+              res.json({
+                "err": "AThlete is already a team member."
+              });
+            }
+          } else {
+            inscription = await prisma.inscription.create({
+              data: {
+                athleteId: athlete.id,
+                editionId: edition.id,
+                raceId: race.id,
+              },
+            });
+            createNewTeam = true;
+          }
+            if (createNewTeam === true && inscription !== null) {
+              const inscriptionId = inscription.id;
+              const team = await prisma.team.create({
+                data: {
+                  name: name,
+                  password: hash,
+                  raceId: race.id,
+                  editionId: edition.id,
+                },
+              });
+              await prisma.inscription.update({
+                where: {
+                  id: inscription?.id,
+                },
+                data: {
+                  teamId: team.id,
+                },
+              });
+              await prisma.teamAdmin.create({
+                data: {
+                  teamId: team.id,
+                  adminInscriptionId: inscriptionId,
+                },
+              });
+              res.json(
+                await prisma.team.findUnique({
+                  where: {
+                    id: team.id,
+                  },
+                  select: selectedFields,
+                })
+              );
+            } else {
+              res.status(500);
+              res.json({
+                err: "Internal error.",
+              });
+            }
+            } else {
+              res.status(400); 
+              res.json({
+                err: "Race full."
+              });
+            }
+            
+          } else {
+            res.status(400); 
+            res.json({
+              "err": "Athlete doesn't exist."
             })
-          );
+          }         
         } else {
-          res.status(400);
+          res.status(400); 
           res.json({
-            err: "Athlete is already a team member.",
+            "err": "Race is not registered for this edition."
           });
         }
       } else {
-        res.status(400);
+        res.status(400); 
         res.json({
-          err: "User is not an athlete.",
-        });
+          "err": "Edition is not active."
+        })
       }
+      
     } catch (e) {
       console.log(e);
       res.status(500);
@@ -149,15 +238,6 @@ export const deleteTeam = async (req: Request, res: Response) => {
   console.log(deleteTeam);
   const teamId = parseInt(req.params.id);
   try {
-    const teamAdmin = await prisma.teamAdmin.findUnique({
-      where: {
-        adminId: req.user.id,
-      },
-    });
-    if (
-      (teamAdmin !== null && teamAdmin.teamId === teamId) ||
-      req.user.role.includes("ADMIN")
-    ) {
       await prisma.team.delete({
         where: {
           id: teamId,
@@ -166,12 +246,6 @@ export const deleteTeam = async (req: Request, res: Response) => {
       res.json({
         success: "Team deleted successfully.",
       });
-    } else {
-      res.status(400);
-      res.json({
-        err: "Not enought rights to delete this team",
-      });
-    }
   } catch (err) {
     console.log(err);
     res.status(500);
@@ -186,98 +260,118 @@ export const joinTeam = async (req: Request, res: Response) => {
   const teamId = parseInt(req.params.id);
   const { password } = req.body;
   try {
-    const team = await prisma.team.findUnique({
+    const athlete = await prisma.athlete.findUnique({
       where: {
-        id: teamId,
+        userId: req.user.id,
       },
-      include: {
-        race: {
-          include: {
-            category: true,
+    });
+     const team = await prisma.team.findUnique({
+       where:{
+         id: teamId,
+       },
+       include: {
+         race: {
+           include: {
+             category: true,
+           },
+         },
+         edition: true,
+       },
+     });
+    const teamMembers = await prisma.inscription.findMany({
+      where: {
+        teamId: team?.id
+      }
+    });
+    if (athlete !== null && team !== null) {
+      if (team !== null && team.race.category.maxTeamMembers > teamMembers.length) {
+        if (team.edition.active === true) {
+          let inscription = await prisma.inscription.findFirst({
+          where: {
+            athleteId: athlete.userId,
+            editionId: team.editionId
           },
-        },
-      },
-    });
-    const teamMembers = await prisma.athlete.findMany({
-      where: {
-        teamId: teamId,
-      },
-    });
-    if (
-      team !== null &&
-      teamMembers.length < team?.race.category.maxTeamMembers
-    ) {
-      bcrypt.compare(password, String(team?.password), async (err, result) => {
-        if (result === true) {
-          console.log(req.user.id);
-          const athlete = await prisma.athlete.findUnique({
-            where: {
-              userId: req.user.id,
-            },
           });
-          const inscription = await prisma.inscription.findFirst({
-            where: {
-              athleteId: athlete?.id,
-              editionId: team.editionId,
-            },
-          });
-          if (athlete !== null) {
-            if (athlete.teamId === null) {
-              if (inscription === null || inscription.raceId === team.raceId) {
-                const team = await prisma.team.update({
-                  where: {
-                    id: teamId,
-                  },
-                  data: {
-                    members: {
-                      connect: {
-                        id: athlete.id,
-                      },
-                    },
-                  },
-                  select: selectedFields,
-                });
-                if (inscription === null) {
-                  await prisma.inscription.create({
-                    data: {
-                      athleteId: athlete.id,
-                      editionId: team.edition.id,
-                      raceId: team.race.id,
-                    },
-                  });
-                }
-                res.json(team);
-              } else {
-                res.status(400);
-                res.json({
-                  err: "The team you try to join is not in the race catégory you pay for.",
-                });
-              }
-            } else {
-              res.status(400);
-              res.json({
-                err: "Athlete is already a member of a team.",
-              });
-            }
-          } else {
-            res.status(400);
-            res.json({
-              err: "User is not an athlete",
-            });
-          }
+           bcrypt.compare(
+             password,
+             String(team.password),
+             async (err, result) => {
+               if (result === true) {
+                 let created = false;
+                 if (inscription === null) {
+                   inscription = await prisma.inscription.create({
+                     data: {
+                       athleteId: athlete.id,
+                       editionId: team.editionId,
+                       teamId: team.id,
+                       raceId: team.raceId,
+                     },
+                   });
+                   created = true;
+                 } else {
+                   if (inscription.teamId === null) {
+                     if (inscription.raceId === team.raceId) {
+                       inscription = await prisma.inscription.update({
+                         where: {
+                           id: inscription.id,
+                         },
+                         data: {
+                           teamId: team.id,
+                         },
+                       });
+                       created = true;
+                     } else {
+                       res.status(400);
+                       res.json({
+                         err: "Wrong race. Team race doesn't match athlete race inscription.",
+                       });
+                     }
+                   } else {
+                     res.status(400);
+                     res.json({
+                       err: "Athlete is already in a team",
+                     });
+                   }
+                 }
+                 if (created) {
+                   res.status(400);
+                   res.json(
+                     await prisma.team.findUnique({
+                       where: {
+                         id: team.id,
+                       },
+                     })
+                   );
+                 }
+               } else {
+                 res.status(400);
+                 res.json({
+                   err: "Wrong password!"
+                 })
+               } 
+             }
+           );
+          
         } else {
-          res.status(403);
+          res.status(400);
           res.json({
-            err: "Wrong password",
-          });
+            err: "Edition is not active."
+          })
         }
-      });
+        
+      } else {
+        res.status(400); 
+        res.json({
+          err: "Team is full."
+        })
+      }
     } else {
-      res.status(400);
+      res.status(400); 
       res.json({
-        err: "Max team members reached.",
-      });
+        err: "Athlete or team doesn't exist."
+      })
     }
+    
   } catch (err) {
     console.log(err);
     res.status(500);
@@ -295,104 +389,83 @@ export const leaveTeam = async (req: Request, res: Response) => {
       where: {
         userId: req.user.id,
       },
-      include: {
-        teamAdmin: {
-          select: {
-            id: true,
-            teamId: true,
-          },
-        },
+    });
+    const team = await prisma.team.findUnique({
+      where: {
+        id: teamId,
       },
     });
-
-    if (athlete !== null) {
-      if (athlete.teamId === teamId) {
-        if (athlete.teamAdmin !== null) {
-          await prisma.teamAdmin.delete({
+    if (athlete !== null && team !== null) {
+      const inscription = await prisma.inscription.findFirst({
+        where: {
+          athleteId: athlete.id,
+          teamId: teamId
+        },
+        include: {
+          teamAdmin: true,
+        },
+      });
+      if (inscription !== null) {
+        await prisma.inscription.update({
             where: {
-              adminId: athlete.id,
-            },
-          });
-
-          const team = await prisma.team.update({
-            where: {
-              id: teamId,
+              id: inscription.id
             },
             data: {
-              members: {
-                disconnect: {
-                  id: athlete.id,
-                },
-              },
-            },
-            select: selectedFields,
-          });
-          const teamAdmins = await prisma.teamAdmin.findMany({
+              teamId: null,
+            }
+          }); 
+        if (inscription.teamAdmin !== null) {
+          await prisma.teamAdmin.deleteMany({
             where: {
-              id: team.id,
+              adminInscriptionId: inscription.id,
+              teamId: team.id,
             },
           });
-          if (teamAdmins.length === 0) {
-            const teamMembers = await prisma.athlete.findMany({
+          const teamAdmins = prisma.teamAdmin.findMany({
+            where: {
+              teamId: team?.id,
+            },
+          });
+          if (teamAdmins !== null && (await teamAdmins).length === 0) {
+            const teamMember = await prisma.inscription.findFirst({
               where: {
                 teamId: team.id,
               },
             });
-            if (teamMembers.length === 0) {
+            if (teamMember !== null) {
+              await prisma.teamAdmin.create({
+                data: {
+                  teamId: team.id,
+                  adminInscriptionId: inscription.id
+                },
+              });
+            } else {
               await prisma.team.delete({
                 where: {
                   id: team.id,
                 },
               });
-              res.json({
-                info: "Team deleted: no more team member.",
-              });
-            } else {
-              await prisma.teamAdmin.create({
-                data: {
-                  teamId: team.id,
-                  adminId: teamMembers[0].id,
-                },
-              });
-              res.json(
-                await prisma.team.findUnique({
-                  where: {
-                    id: teamId,
-                  },
-                  select: selectedFields,
-                })
-              );
             }
-          } else {
-            res.json(team);
           }
-        } else {
-          res.json(await prisma.team.update({
+          res.json(await prisma.team.findUnique({
             where: {
-              id: teamId,
+              id: team.id,
             },
-            data: {
-              members: {
-                disconnect: {
-                  id: athlete.id,
-                },
-              },
-            },
-            select: selectedFields,
-          }));
+            select: selectedFields
+          }))
         }
+      } else {
+        res.status(400); 
+        res.json({
+          err: "Athlete is not a team member"
+        })
+      }
       } else {
         res.status(400);
         res.json({
-          err: "Athlete is not a team member",
+          err: "Athlte or team doesn't exists.",
         });
       }
-    } else {
-      res.status(400);
-      res.json({
-        err: "User is not an Athlete",
-      });
-    }
   } catch (err) {
     console.log(err);
     res.status(500);
@@ -406,69 +479,80 @@ export const addTeamAdmin = async (req: Request, res: Response) => {
   const teamId = parseInt(req.params.id);
   const { athleteId } = req.body;
   try {
-    const admin = await prisma.athlete.findUnique({
+    const team = await prisma.team.findUnique({
       where: {
-        userId: req.user.id,
+        id: teamId,
       },
       include: {
-        teamAdmin: {
-          select: {
-            teamId: true,
-          },
-        },
+        edition: true,
       },
     });
-    console.log(admin);
-    const athlete = await prisma.athlete.findUnique({
-      where: {
-        id: athleteId,
-      },
-      include: {
-        teamAdmin: {
-          select: {
-            teamId: true,
+   
+    if (team !== null && team.edition.active === true) {
+      const admin = await prisma.inscription.findFirst({
+        where: {
+          athlete: {
+            is: {
+              userId: req.user.id,
+            },
+          },
+          teamId: team?.id,
+        },
+        include: {
+          teamAdmin: {
+            select: {
+              teamId: true,
+            },
           },
         },
-      },
-    });
-    if (
-      admin !== null &&
-      admin?.teamAdmin?.teamId !== null &&
-      admin?.teamAdmin?.teamId === teamId
-    ) {
-      if (athlete !== null && athlete.teamId === teamId) {
-        if (athlete.teamAdmin === null) {
-          await prisma.teamAdmin.create({
-            data: {
-              adminId: athlete.id,
-              teamId: teamId,
-            },
-          });
-          const team = await prisma.team.findUnique({
-            where: {
-              id: teamId,
-            },
-            select: selectedFields,
-          });
-          res.json(team);
+      });
+      if (admin !== null && admin.teamAdmin !== null && admin.teamAdmin.teamId === team.id) {
+        const inscription = await prisma.inscription.findFirst({
+          where: {
+            athleteId: athleteId,
+            teamId: teamId,
+          },
+          include: {
+            teamAdmin: true,
+          },
+        });
+        if (inscription !== null) {
+          if (inscription.teamAdmin === null) {
+            await prisma.teamAdmin.create({
+              data: {
+                teamId: team.id,
+                adminInscriptionId: inscription.id,
+              }
+            });
+            res.json(await prisma.team.findUnique({
+              where: {
+                id: team.id,
+              },
+            }));
+          } else {
+            res.status(400); 
+            res.json({
+              err: "Member is already a team admin.",
+            });
+          }
         } else {
           res.status(400);
           res.json({
-            err: "Athlete selected is already a team admin.",
+            err: "Athlete is not a team member.",
           });
         }
       } else {
         res.status(400);
         res.json({
-          err: "Athelete selected is not a team member.",
-        });
+          err: "Athlete must be a team admin."
+        })
       }
     } else {
-      res.status(403);
+      res.status(400);
       res.json({
-        err: "User is not an admin of the team.",
+        err: "Team doesn't exist or editon is not active"
       });
-    }
+    }   
   } catch (err) {
     console.log(err);
     res.status(500);
@@ -483,92 +567,93 @@ export const removeTeamAdmin = async (req: Request, res: Response) => {
   const teamId = parseInt(req.params.id);
   const { athleteId } = req.body;
   try {
-    const athlete = await prisma.athlete.findUnique({
+    const team = await prisma.team.findUnique({
       where: {
-        id: athleteId,
-      },
-      include: {
-        teamAdmin: {
-          select: {
-            teamId: true,
+        id: teamId
+      }
+    }); 
+    if (team !== null) {
+      const admin = await prisma.teamAdmin.findFirst({
+        where: {
+          teamId: team?.id,
+          adminInscription: {
+            is: {
+              athlete: {
+                is: {
+                  userId: req.user.id,
+                },
+              },
+            },
           },
         },
-      },
-    });
-    const admin = await prisma.athlete.findUnique({
-      where: {
-        userId: req.user.id,
-      },
-      include: {
-        teamAdmin: {
-          select: {
-            adminId: true,
-            teamId: true,
+        include: {
+          adminInscription: {
+            include: {
+              athlete: true,
+            },
           },
         },
-      },
-    });
-    if (admin !== null) {
-      if (admin.teamId === teamId) {
-        if (admin.teamAdmin !== null && admin.teamAdmin.teamId === teamId) {
-          if (athlete !== null) {
-            if (athlete.teamId === teamId) {
-              if (athlete.id !== admin.id) {
-                if (
-                  athlete.teamAdmin !== null &&
-                  athlete.teamAdmin.teamId === teamId
-                ) {
-                  await prisma.teamAdmin.delete({
-                    where: {
-                      adminId: athlete.id,
-                    },
-                  });
-                }
-                const team = await prisma.team.findUnique({
-                  where: {
-                    id: teamId,
-                  },
-                  select: selectedFields,
-                });
-                res.json(team);
-              } else {
-                res.status(400);
-                res.json({
-                  err: "You cannot remove yourself from the team: use leave function instead.",
-                });
-              }
-            } else {
-              res.status(400);
-              res.json({
-                err: "Athlete is not a member of yout team.",
-              });
-            }
+      });
+      if (admin !== null) {
+         const athlete = await prisma.teamAdmin.findFirst({
+           where: {
+             teamId: team?.id,
+             adminInscription: {
+               is: {
+                 athlete: {
+                   is: {
+                     id: athleteId,
+                   },
+                 },
+               },
+             },
+           },
+           include: {
+          adminInscription: {
+            include: {
+              athlete: true,
+            },
+          },
+        },
+         });
+        if (athlete !== null) {
+          if (admin.adminInscription.athlete.id !== athlete.adminInscription.athleteId) {
+            await prisma.teamAdmin.delete({
+              where: {
+                id: athlete.id,
+              },
+            }); 
+            res.json(await prisma.team.findUnique({
+              where: {
+                id: team.id,
+              },
+              select: selectedFields
+            }));
           } else {
             res.status(400);
             res.json({
-              err: "The user is not an athlete.",
+              err: "Admin cannot remove him/herself."
             });
           }
         } else {
-          res.status(400);
+          res.status(400); 
           res.json({
-            err: "You are not a team admin.",
+            err: "Athlete is not an Admin."
           });
         }
       } else {
-        res.status(400);
+        res.status(400); 
         res.json({
-          err: "You are not a member of the team.",
+          err: "Team doesn't exist."
         });
       }
-    } else {
-      res.status(400);
-      res.json({
-        err: "You are not an athlete.",
-      });
     }
   } catch (err) {
     console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
   }
 };
 
@@ -578,100 +663,77 @@ export const removeTeamMember = async (req: Request, res: Response) => {
   // todo ETUDIER QUAND C'EST NULL
   const { athleteId } = req.body;
   try {
-    const athlete = await prisma.athlete.findUnique({
+    const team = await prisma.team.findUnique({
       where: {
-        id: athleteId,
-      },
-      include: {
-        teamAdmin: {
-          select: {
-            teamId: true,
-          },
-        },
+        id: teamId,
       },
     });
-    const admin = await prisma.athlete.findUnique({
-      where: {
-        userId: req.user.id,
-      },
-      include: {
-        teamAdmin: {
-          select: {
-            adminId: true,
-            teamId: true,
+    if (team !== null) {
+      const admin = await prisma.teamAdmin.findFirst({
+        where: {
+          teamId: teamId,
+          adminInscription: {
+            is: {
+              athlete: {
+                userId: req.user.id,
+              },
+            },
           },
         },
-      },
-    });
-    if (admin !== null) {
-      if (admin.teamId === teamId) {
-        if (admin.teamAdmin !== null && admin.teamAdmin.teamId === teamId) {
-          if (athlete !== null) {
-            if (athlete.teamId === teamId) {
-              if (athlete.id !== admin.id) {
-                if (
-                  athlete.teamAdmin !== null &&
-                  athlete.teamAdmin.teamId === teamId
-                ) {
-                  await prisma.teamAdmin.delete({
-                    where: {
-                      adminId: athlete.id,
-                    },
-                  });
-                }
-                await prisma.athlete.update({
-                  where: {
-                    id: athlete.id,
-                  },
-                  data: {
-                    teamId: null,
-                  },
-                });
-                const team = await prisma.team.findUnique({
-                  where: {
-                    id: teamId,
-                  },
-                  select: selectedFields,
-                });
-                res.json(team);
-              } else {
-                res.status(400);
-                res.json({
-                  err: "You cannot remove yourself from the team: use leave function instead.",
-                });
-              }
-            } else {
-              res.status(400);
-              res.json({
-                err: "Athlete is not a member of yout team.",
-              });
-            }
-          } else {
-            res.status(400);
-            res.json({
-              err: "The user is not an athlete.",
-            });
+        include: {
+          adminInscription: {
+            include: {
+              athlete: true,
+            },
+          },
+        },
+      });
+      if (admin !== null) {
+        const member = await prisma.inscription.findFirst({
+          where: {
+            athleteId: athleteId,
+            teamId: team.id
           }
+        }); 
+        if (member !== null) {
+          await prisma.inscription.update({
+            where: {
+              id: member.id
+            },
+            data: {
+              teamId: null,
+            }
+          }); 
+          res.json(await prisma.team.findUnique({
+            where: {
+              id: team.id,
+            },
+            select: selectedFields,
+          }));
         } else {
-          res.status(400);
+          res.status(400); 
           res.json({
-            err: "You are not a team admin.",
-          });
+            err: "Athlete is not a team member."
+          })
         }
       } else {
-        res.status(400);
+        res.status(400); 
         res.json({
-          err: "You are not a member of the team.",
-        });
+          err: "Athlete is not a team admin."
+        })
       }
     } else {
       res.status(400);
       res.json({
-        err: "You are not an athlete.",
-      });
+        err: "Team doesn't exist."
+      })
     }
   } catch (err) {
     console.log(err);
+     res.status(500);
+     res.json({
+       err: "Internal error.",
+     });
   }
 };
 
@@ -680,51 +742,53 @@ export const updateTeamPassword = async (req: Request, res: Response) => {
   const { password } = req.body;
   const teamId = parseInt(req.params.id);
   try {
-    const admin = await prisma.athlete.findUnique({
+    const team = await prisma.team.findUnique({
       where: {
-        userId: req.user.id,
-      },
-      include: {
-        teamAdmin: {
-          select: {
-            teamId: true,
-          },
-        },
+        id: teamId,
       },
     });
-    if (admin !== null) {
-      if (admin.teamId !== null && admin.teamId === teamId) {
-        if (admin.teamAdmin !== null && admin.teamAdmin?.teamId === teamId) {
-          bcrypt.hash(password, saltRounds, async (err, hash) => {
-            await prisma.team.update({
-              data: {
-                password: hash,
-              },
-              where: {
-                id: teamId,
-              },
-            });
-          });
-          res.json({
-            succes: "Team password successfully updated.",
-          });
-        } else {
-          res.status(400);
-          res.json({
-            err: "Athlete doesn't have enought rignts.",
-          });
-        }
-      } else {
-        res.status(400);
-        res.json({
-          err: "Athlete is not a team member.",
-        });
-      }
-    } else {
-      res.status(400);
-      res.json({
-        err: "User is not an athlete.",
-      });
+    if (team !== null) {
+       const admin = await prisma.teamAdmin.findFirst({
+         where: {
+           teamId: teamId,
+           adminInscription: {
+             is: {
+               athlete: {
+                 is: {
+                   userId: req.user.id,
+                 },
+               },
+             },
+           },
+         },
+       });
+       if (admin !== null) {
+         if (admin.teamId !== null && admin.teamId === teamId) {
+             bcrypt.hash(password, saltRounds, async (err, hash) => {
+               await prisma.team.update({
+                 data: {
+                   password: hash,
+                 },
+                 where: {
+                   id: teamId,
+                 },
+               });
+             });
+             res.json({
+               succes: "Team password successfully updated.",
+             });
+         } else {
+           res.status(400);
+           res.json({
+             err: "Athlete is not a team member.",
+           });
+         }
+       } else {
+         res.status(400);
+         res.json({
+           err: "User is not an athlete.",
+         });
+       }
     }
   } catch (err) {
     console.log(err);

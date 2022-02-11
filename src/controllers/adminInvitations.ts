@@ -4,7 +4,6 @@ import { sendEmail } from "../utils/emails";
 import { secureRandomToken } from "../utils/secureRandomToken";
 import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
-import { parse } from "path/posix";
 
 const selectedFields = {
   id: true,
@@ -100,8 +99,8 @@ export const createInvitation = async (req: Request, res: Response) => {
           err: "Admin already exists.",
         });
       }
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
       res.status(500);
       res.json({
         err: "Internal error.",

@@ -8,8 +8,13 @@ const selectedFields = {
     description: true, 
     races: {
         select: {
-            raceId: true,
-        }
+            race: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
     },
     edition: {
         select: {

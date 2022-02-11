@@ -130,15 +130,15 @@ export const updateCategory = async (
 };
 
 export const deleteCatgeory = async (
-    req: Request, 
+    req: Request,
     res: Response
 ) => {
     const categoryId = parseInt(req.params.id);
-    try{
+    try {
         await prisma.category.delete({
             where: {
                 id: categoryId,
-            }, 
+            },
             select: {
                 name: true,
             },
@@ -153,4 +153,4 @@ export const deleteCatgeory = async (
             'err': 'Internal error.'
         });
     }
-}
+};

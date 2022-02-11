@@ -13,11 +13,8 @@ import { validationResult } from "express-validator";
 
 export const login = async (req: Request, res: Response) => {
   try {
-
     const { username, email, password } = req.body;
-
     let user: User | null = null;
-
     try {
       if (username) {
         user = await prisma.user.findUnique({
