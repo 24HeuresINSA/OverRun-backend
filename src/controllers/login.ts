@@ -13,6 +13,8 @@ import { validationResult } from "express-validator";
 
 export const login = async (req: Request, res: Response) => {
   try {
+    let adminId = null;
+    let athleteId = null;
     const { username, email, password } = req.body;
     let user: User | null = null;
     try {
@@ -27,7 +29,7 @@ export const login = async (req: Request, res: Response) => {
             email: true,
             password: true,
           },
-        })
+        });
       } else {
         user = await prisma.user.findUnique({
           where: {
@@ -53,6 +55,15 @@ export const login = async (req: Request, res: Response) => {
 
         if (admin) {
           role = "ADMIN";
+          adminId = admin.id;
+          const athlete: Athlete | null = await prisma.athlete.findUnique({
+            where: {
+              userId: user.id,
+            },
+          });
+          if (athlete) {
+            athleteId = athlete.id;
+          }
         } else {
           const athlete: Athlete | null = await prisma.athlete.findUnique({
             where: {
@@ -61,6 +72,7 @@ export const login = async (req: Request, res: Response) => {
           });
           if (athlete) {
             role = "ATHLETE";
+            athleteId = athlete.id;
           } else {
             res.status(401);
             res.json({
@@ -81,6 +93,8 @@ export const login = async (req: Request, res: Response) => {
               expire_at: new Date(
                 currentDate.getTime() + accessTokenTimeout * 1000
               ),
+              athleteId: athleteId,
+              adminId: adminId,
             },
             accessTokenSecret,
             {

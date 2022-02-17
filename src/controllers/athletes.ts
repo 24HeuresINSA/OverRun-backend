@@ -85,6 +85,8 @@ export const createAthlete = async (req: Request, res: Response) => {
     email,
     username,
     password,
+    dateOfBirth,
+    sex
   } = req.body;
   bcrypt.hash(password, saltRounds, async (err, hash) => {
     if (err) {
@@ -116,6 +118,8 @@ export const createAthlete = async (req: Request, res: Response) => {
           city: city,
           country: country,
           phoneNumber: phoneNumber,
+          sex: sex, 
+          dateOfBirth: dateOfBirth,
         },
         select: selectedFields,
       });

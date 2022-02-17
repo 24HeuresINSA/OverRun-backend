@@ -72,6 +72,8 @@ model Athlete {
   city         String        @db.VarChar(50)
   country      String        @default("France")
   phoneNumber  String        @db.VarChar(12)
+  sex          Boolean
+  dateOfBirth  DateTime
   inscriptions Inscription[]
 }
 
@@ -147,7 +149,7 @@ model RaceDiscipline {
 model Certificate {
   // Status signification
   // 1: Validated
-  // 2: Being valudated
+  // 2: Being validated
   // 3: Seen
   // 4: Unseen
   // 5: Rejected
