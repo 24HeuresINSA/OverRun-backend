@@ -16,6 +16,8 @@ import { editionRouter } from "./routes/editions";
 import { certificateRouter } from "./routes/certificates";
 import { inscriptionRouter } from "./routes/inscriptions";
 
+const PATH = "/api/v" + (process.env.API_VERSION || "1");
+
 export const app = express();
 
 export const transporter = nodemailer.createTransport({
@@ -27,8 +29,6 @@ export const transporter = nodemailer.createTransport({
   },
   secure: true,
 });
-
-const PATH = "/api/v1";
 
 app.use(express.json());
 app.use(bodyParser.json());

@@ -1,4 +1,4 @@
-FROM node:12.22.12 AS builder
+FROM node:16.17.1-alpine3.16 AS builder
 
 WORKDIR /app
 
@@ -12,17 +12,14 @@ RUN npx prisma generate
 
 RUN npm run build
 
-FROM node:12.22.1-slim
+FROM node:16.17.1-alpine3.16
 
 ENV NODE_ENV production
 
 WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm install --only=production
-
 COPY --chown=node:node --from=builder /app/dist /app
+COPY --chown=node:node --from=builder /app/node_modules /app/node_modules
 
 EXPOSE 3000
 

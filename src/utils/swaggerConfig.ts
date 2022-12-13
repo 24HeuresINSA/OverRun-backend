@@ -18,7 +18,7 @@ const swaggerDefinition = {
     },
     servers: [
         {
-            url: "/api/v" + process.env.API_VERSION, 
+            url: "/api/v" + (process.env.API_VERSION || "1"), 
             description: 'Development server',
         },
     ],
