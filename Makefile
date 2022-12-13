@@ -1,5 +1,3 @@
-
-
 help:
 		@echo ""
 		@echo "usage: make COMMAND"

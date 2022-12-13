@@ -9,18 +9,37 @@ import { search } from "../middlewares/search";
 export const teamRouter = express.Router();
 
 teamRouter.get(
-    "/teams",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
+  "/teams",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  filter([
+    [["editionId", "id"], "number", true, ["edition", "id"]],
+    [
+      [
+        "maxParticipants",
+        "number",
+        true,
+        ["race", "category", "maxParticipants"],
+      ],
+    ],
+  ]),
+  search([["name", "string", false]]),
+  paginate(10),
+  teamCtrl.getTeams
+); 
+
+teamRouter.get(
+  "/teams/light",
+  authenticateJWT,
     filter([
         [["editionId", "id"], "number", true, ["edition", "id"]],
+        [["maxParticipants", "number", true, ["race", "category", "maxParticipants"]]]
     ]),
-    search([
-        ["name", "string", false]
-    ]),
-    paginate(10),
-    teamCtrl.getTeams
+  search([["name", "string", false]]),
+  paginate(10),
+  teamCtrl.getTeamsLight
 ); 
+
 
 teamRouter.get(
     "/teams/:id",

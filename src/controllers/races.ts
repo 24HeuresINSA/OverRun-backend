@@ -10,8 +10,19 @@ const selectedFields = {
     vaRegistrationPrice: true,
     maxParticipants: true,
     maxTeams: true,
+    inscriptions: {
+        select: {
+            id: true,
+        },
+    },
+    teams: {
+        select: {
+            id: true,
+        },
+    },
     disciplines: {
         select: {
+            id: true,
             discipline: {
                 select: {
                     id: true,

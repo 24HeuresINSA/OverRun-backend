@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { DEBUG, emailTimeout, prisma, saltRounds } from "../server";
+import { emailTimeout, prisma, saltRounds } from "../server";
 import { sendEmail } from "../utils/emails";
-import { secureRandomToken } from "../utils/secureRandomToken";
+// import { secureRandomToken } from "../utils/secureRandomToken";
 import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 
@@ -32,7 +32,15 @@ export const getInvitations = async (req: Request, res: Response) => {
 export const createInvitation = async (req: Request, res: Response) => {
   console.log(createInvitation);
   const { email } = req.body;
-  const token = DEBUG ? "token_debug" : String(secureRandomToken(50));
+  const rand = function () {
+    return Math.random().toString(36).substr(2);
+  };
+  const generateToken = function () {
+    return rand() + rand(); // to make it longer
+  };
+  const token = generateToken();
+  console.log(token);
+  console.log(process.env.FRONTEND_USER_URL);
   const currentDate = new Date();
   bcrypt.hash(token, saltRounds, async (err, hash) => {
     if (err) {
@@ -62,9 +70,8 @@ export const createInvitation = async (req: Request, res: Response) => {
               email: email,
             },
           });
-          let invitation = {};
           if (userAlreadyExists) {
-            invitation = await prisma.adminInvite.create({
+            const invitation = await prisma.adminInvite.create({
               data: {
                 email: email,
                 token: hash,
@@ -73,8 +80,14 @@ export const createInvitation = async (req: Request, res: Response) => {
               },
               select: selectedFields,
             });
+            sendEmail(email, "Invitation à rejoindre Overun", "AdminInvite", {
+              token: token,
+              url: process.env.FRONTEND_USER_URL + "admin?token=",
+              id: invitation.id,
+            });
+            res.json(invitation);
           } else {
-            invitation = await prisma.adminInvite.create({
+            const invitation = await prisma.adminInvite.create({
               data: {
                 email: email,
                 token: hash,
@@ -82,11 +95,13 @@ export const createInvitation = async (req: Request, res: Response) => {
               },
               select: selectedFields,
             });
+            sendEmail(email, "Invitation à rejoindre Overun", "AdminInvite", {
+              token: token,
+              url: process.env.FRONTEND_USER_URL + "admin?token=",
+              id: invitation.id,
+            });
+            res.json(invitation);
           }
-          sendEmail(email, "Invitation à rejoindre Overun", "AdminInvite", {
-            token: token,
-          });
-          res.json(invitation);
         } else {
           res.status(400);
           res.json({

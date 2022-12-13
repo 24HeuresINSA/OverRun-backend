@@ -11,40 +11,42 @@ const selectedFields = {
       id: true,
       athlete: {
         select: {
-          id: true, 
+          id: true,
           user: {
             select: {
               id: true,
               username: true,
-              email: true
+              email: true,
             },
           },
           firstName: true,
           lastName: true,
         },
       },
+      validated: true
     },
   },
   race: {
     select: {
-      id: true, 
-      name:true,
-    }
+      id: true,
+      name: true,
+      category: {
+        select: {
+          id: true,
+          maxTeamMembers: true, 
+          minTeamMembers: true,
+        }
+      }
+    },
   },
   admins: {
     select: {
       id: true,
-      admin: {
+      adminInscription: {
         select: {
           id: true,
         },
       },
-    },
-  },
-  edition: {
-    select: {
-      id: true,
-      name: true,
     },
   },
 };
@@ -57,6 +59,28 @@ export const getTeams = async (req: Request, res: Response) => {
       take: req.paginate.limit,
       where: Object.assign({}, req.search, req.filter),
       select: selectedFields,
+    });
+    res.json(jsonPaginateResponse(teams, req));
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const getTeamsLight = async (req: Request, res: Response) => {
+  console.log(getTeams);
+  try {
+    const teams = await prisma.team.findMany({
+      skip: req.paginate.skipIndex,
+      take: req.paginate.limit,
+      where: Object.assign({}, req.search, req.filter),
+      select: {
+        id: true,
+        name: true,
+      },
     });
     res.json(jsonPaginateResponse(teams, req));
   } catch (err) {

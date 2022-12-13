@@ -13,33 +13,37 @@ import { athleteRouter } from "./routes/athletes";
 import { teamRouter } from "./routes/teams";
 import { raceRouter } from "./routes/races";
 import { editionRouter } from "./routes/editions";
+import { certificateRouter } from "./routes/certificates";
+import { inscriptionRouter } from "./routes/inscriptions";
 
 export const app = express();
 
 export const transporter = nodemailer.createTransport({
-    port: 465, 
-    host: "smtp.gmail.com", 
-    auth: {
-        user: process.env.EMAIL_ADDRESS,
-        pass: process.env.EMAIL_PASSWORD,
-    }, 
-    secure: true
+  port: 465,
+  host: "smtp.gmail.com",
+  auth: {
+    user: process.env.EMAIL_ADDRESS,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+  secure: true,
 });
 
 const PATH = "/api/v1";
 
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(fileUpload({
-    createParentPath: true, 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  fileUpload({
+    createParentPath: true,
     limits: {
-        fileSize: 2 * 1024 * 1024 * 1024,
-    }, 
-    abortOnLimit: true
-}));
+      fileSize: 2 * 1024 * 1024 * 1024,
+    },
+    abortOnLimit: true,
+  })
+);
 
-app.use(PATH, loginRouter)
+app.use(PATH, loginRouter);
 app.use(PATH, adminRouter);
 app.use(PATH, adminInvitationRouter);
 app.use(PATH, categoryRouter);
@@ -48,5 +52,6 @@ app.use(PATH, athleteRouter);
 app.use(PATH, teamRouter);
 app.use(PATH, raceRouter);
 app.use(PATH, editionRouter);
+app.use(PATH, certificateRouter);
+app.use(PATH, inscriptionRouter);
 app.use(PATH, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-

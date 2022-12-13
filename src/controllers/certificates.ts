@@ -26,7 +26,7 @@ const selectedFields = {
             },
       },
   },
-  uploadAt: true,
+  uploadedAt: true,
   status: true,
   statusUpdatedAt: true,
     statusUpdatedBy: {
@@ -43,7 +43,7 @@ const selectedFields = {
   },
 };
 
-const path = "../../uploads/certificates/";
+const path = "./certificates/";
 
 export const getCertificates = async(
     req: Request,
@@ -73,29 +73,43 @@ export const uploadCertificate = async(
 ) => {
     console.log(uploadCertificate);
     const { editionId } = req.body;
+    console.log("User id: " + req.user.id);
     try {
         if (req.files) {
+            console.log("Ok file");
             const inscription = await prisma.inscription.findFirst({
                 where: {
                     athlete: {
                         is: {
-                            userId: req.user.id,
-                        },
+                            userId : req.user.id
+                        }
                     },
-                    editionId: editionId
+                    editionId: parseInt(editionId)
                 },
             });
+            // const inscriptions = await prisma.inscription.findMany();
+            console.log(inscription)
             if (inscription !== null) {
+                console.log(req.files)
                 const certificate_file = req.files
-                  ?.certificate as fileUpload.UploadedFile;
-                const filename = Date.now().toString() + ".jpeg";
+                    ?.certificate as fileUpload.UploadedFile;
+                console.log(certificate_file)
+                let extention = ";"
+                switch (certificate_file.mimetype) {
+                    case 'application/pdf':
+                        extention = ".pdf";
+                        break;
+                    default:
+                        extention = ".png";
+                }
+                const filename = Date.now().toString() + extention;
+                console.log(filename)
                 certificate_file.mv(path + filename);
                     
                 const certificate = await prisma.certificate.findUnique({
                     where: {
                         inscriptionId: inscription.id,
                     },
-                    select: selectedFields,
                 });
                 if (certificate !== null) {
                     try {
@@ -142,6 +156,7 @@ export const uploadCertificate = async(
             })
         }
     } catch (err) {
+        console.log(err);
         res.status(500);
         res.json({
             err: "Internal error",

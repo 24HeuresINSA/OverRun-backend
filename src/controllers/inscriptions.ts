@@ -14,7 +14,7 @@ const selectedFields = {
           email: true,
         },
       },
-      fistName: true,
+      firstName: true,
       lastName: true,
     },
   },
@@ -47,7 +47,7 @@ const selectedFields = {
       status: true,
     },
   },
-  payement: {
+  payment: {
     select: {
       id: true,
       status: true,

@@ -1,12 +1,30 @@
-FROM node:16.13.1-alpine3.14
+FROM node:12.22.12 AS builder
 
-WORKDIR /usr/app
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci --silent
 
 COPY . .
 
-RUN npm install &&\
-    npm cache --force clean
+RUN npx prisma generate
 
-WORKDIR /usr/app/src
+RUN npm run build
 
-CMD ["npm", "run", "start"]
+FROM node:12.22.1-slim
+
+ENV NODE_ENV production
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+COPY --chown=node:node --from=builder /app/dist /app
+
+EXPOSE 3000
+
+CMD [  "node", "server.js" ]
+

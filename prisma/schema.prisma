@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl", "darwin-arm64"]
 }
 
 datasource db {
@@ -172,6 +173,7 @@ model Payment {
   value         Float
   transaction   String      @db.VarChar(255)
   filename      String      @db.VarChar(50)
+  status        Int
 }
 
 model Team {

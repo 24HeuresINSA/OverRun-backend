@@ -4,6 +4,10 @@ import { secureRandomToken } from "../utils/secureRandomToken";
 import { sendEmail } from "../utils/emails";
 import bcrypt from "bcrypt";
 
+// export const getUsers = async (req: Request, res: Response) => {
+ 
+// }
+
 export const createPasswordInvite = async (req: Request, res: Response) => {
   console.log(createPasswordInvite);
   const { email } = req.body;

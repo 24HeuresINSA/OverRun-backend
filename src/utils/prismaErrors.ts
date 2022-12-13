@@ -7,7 +7,7 @@ export const analyseError = (e: Error, res: Response) => {
             case "P2000":
                 res.status(400)
                 res.json({
-                    'err': "The value is to long for" + e.meta["column_name"]
+                    'err': "The value is to long"
                 })
                 break;
             case "P2001":
@@ -15,12 +15,13 @@ export const analyseError = (e: Error, res: Response) => {
                 res.json({
                     'err': ""
                 })
+                break;
             case "P2002":
                 res.status(400)
                 res.json({
                     'err': ""
                 })
-            
+                break;
         }
     }
 

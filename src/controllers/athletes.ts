@@ -3,6 +3,7 @@ import { prisma, saltRounds } from "../server";
 import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 import { login } from "./login";
+// import { adminInvitationRouter } from "../routes/adminInvitations";
 
 const selectedFields = {
   id: true,
@@ -20,6 +21,8 @@ const selectedFields = {
   city: true,
   country: true,
   phoneNumber: true,
+  dateOfBirth: true,
+  sex: true
 };
 
 export const getAthletes = async (req: Request, res: Response) => {
@@ -119,7 +122,7 @@ export const createAthlete = async (req: Request, res: Response) => {
           country: country,
           phoneNumber: phoneNumber,
           sex: sex, 
-          dateOfBirth: dateOfBirth,
+          dateOfBirth: new Date(Date.parse(dateOfBirth)),
         },
         select: selectedFields,
       });
@@ -194,11 +197,29 @@ export const deleteAthlete = async (req: Request, res: Response) => {
   console.log(deleteAthlete);
   const athleteId = parseInt(req.params.id);
   try {
+    const athlete = await prisma.athlete.findUnique({
+      where: {
+        id: athleteId,
+      }
+    });
+    const userId = athlete?.userId;
     await prisma.athlete.delete({
       where: {
         id: athleteId,
       },
     });
+    const admin = await prisma.admin.findFirst({
+      where: {
+        userId: userId
+      }
+    }); 
+    if (!admin) {
+      await prisma.user.delete({
+        where: {
+          id: userId,
+        }
+      });
+    }
     res.json({
       success: "Athlete deleted successfully.",
     });

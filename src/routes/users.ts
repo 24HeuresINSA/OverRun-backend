@@ -51,7 +51,7 @@ export const usersRouter = express.Router();
  *                         description: The user's name.
  *                         example: Leanne Graham
  */
-usersRouter.get('/users', userCtrl.getUsers);
+// usersRouter.get('/users', userCtrl.getUsers);
 
 /**
 * @swagger
@@ -88,5 +88,5 @@ usersRouter.get('/users', userCtrl.getUsers);
 *                       description: The user's name.
 *                       example: Leanne Graham
 */
-usersRouter.get('/users/:id', userCtrl.getUserById);
+// usersRouter.get('/users/:id', userCtrl.getUserById);
 

@@ -44,6 +44,30 @@ export const getCategories = async (
     }
 };
 
+export const getCategoriesLight = async (req: Request, res: Response) => {
+  console.log(getCategories);
+  try {
+    const categories = await prisma.category.findMany({
+        select: {
+            id: true,
+            name: true, 
+            maxTeamMembers: true, 
+            minTeamMembers: true,
+      },
+      skip: req.paginate.skipIndex,
+      take: req.paginate.limit + 1,
+      where: Object.assign({}, req.search, req.filter),
+    });
+    res.json(jsonPaginateResponse(categories, req));
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
 export const getCategoryById = async (
     req: Request, 
     res: Response

@@ -9,42 +9,38 @@ import { search } from "../middlewares/search";
 export const raceRouter = express.Router();
 
 raceRouter.get(
-    "/races",
-    filter([
-        [["editionId", "id"], "number", true, ["edition", "id"]],
-    ]),
-    search([
-        ["name", "string", false],
-        [["discipline_name", "name"], "string", true, ["disciplines", "race"]],
-        [["category_name", "name"], "string", true, ["category"]]
-    ]),
+  "/races",
+  filter([
+    [["editionId", "id"], "number", true, ["edition", "id"]],
+    [["categoryId", "id"], "number", true, ["category"]],
+    ["maxTeamMembers", "number", true, ["category"]],
+  ]),
+  search([
+    ["name", "string", false],
+  ]),
   paginate(10),
   raceCtrl.getRaces
 );
 
-raceRouter.get(
-    "/races/:id",
-    raceCtrl.getRaceById
-);
-
+raceRouter.get("/races/:id", raceCtrl.getRaceById);
 
 raceRouter.post(
-    "/races",
-    authenticateJWT, 
-    accessControl(["ADMIN"]),
-    raceCtrl.createRace
+  "/races",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  raceCtrl.createRace
 );
 
 raceRouter.put(
-    "/races/:id", 
-    authenticateJWT, 
-    accessControl(["ADMIN"]), 
-    raceCtrl.updateRace
-)
+  "/races/:id",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  raceCtrl.updateRace
+);
 
 raceRouter.delete(
-    "/races/:id",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
-    raceCtrl.deleteRace
+  "/races/:id",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  raceCtrl.deleteRace
 );

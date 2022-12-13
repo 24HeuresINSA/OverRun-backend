@@ -54,7 +54,8 @@ export const sendEmail = (
     }
 
     transporter.sendMail(emailData, (err, info) => {
-        if(err){
+        if (err) {
+            console.log(info)
             return console.log(err);
         }
     });

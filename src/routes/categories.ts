@@ -24,6 +24,18 @@ categoryRouter.get(
 );
 
 categoryRouter.get(
+  "/categories/light",
+  authenticateJWT,
+  filter([
+    ["id", "number", false],
+    [["editionId", "id"], "number", true, ["edition", "id"]],
+  ]),
+  search([["name", "string", false]]),
+  paginate(10),
+  categoryCtrl.getCategoriesLight
+);
+
+categoryRouter.get(
     "/categories/:id",
     authenticateJWT,
     accessControl(["ADMIN"]),
