@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl", "darwin-arm64"]
 }
 
@@ -105,7 +105,7 @@ model VA {
 model Category {
   id             Int     @id @default(autoincrement())
   name           String  @db.VarChar(50)
-  description    String  @db.MediumText
+  description    String  @db.Text
   maxTeamMembers Int     @default(1)
   minTeamMembers Int     @default(1)
   races          Race[]
@@ -116,7 +116,7 @@ model Category {
 model Discipline {
   id          Int              @id @default(autoincrement())
   name        String           @db.VarChar(50)
-  description String           @db.MediumText
+  description String           @db.Text
   races       RaceDiscipline[]
   edition     Edition          @relation(fields: [editionId], references: [id], onDelete: Cascade)
   editionId   Int
