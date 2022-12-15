@@ -1,0 +1,7 @@
+FROM node:16.17.1-alpine3.16
+
+WORKDIR /app
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "npm i && npm run dev"]
