@@ -41,7 +41,7 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
           },
         });
       });
-      sendEmail(email, "Invitation à rejoindre Overun", "AdminInvite", {
+      sendEmail(email, "Invitation à rejoindre OverRun", "AdminInvite", {
         token: token,
       });
       res.json({

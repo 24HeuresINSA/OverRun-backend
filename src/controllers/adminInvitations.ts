@@ -80,7 +80,7 @@ export const createInvitation = async (req: Request, res: Response) => {
               },
               select: selectedFields,
             });
-            sendEmail(email, "Invitation à rejoindre Overun", "AdminInvite", {
+            sendEmail(email, "Invitation à rejoindre OverRun", "AdminInvite", {
               token: token,
               url: process.env.FRONTEND_USER_URL + "admin?token=",
               id: invitation.id,
@@ -95,7 +95,7 @@ export const createInvitation = async (req: Request, res: Response) => {
               },
               select: selectedFields,
             });
-            sendEmail(email, "Invitation à rejoindre Overun", "AdminInvite", {
+            sendEmail(email, "Invitation à rejoindre OverRun", "AdminInvite", {
               token: token,
               url: process.env.FRONTEND_USER_URL + "admin?token=",
               id: invitation.id,

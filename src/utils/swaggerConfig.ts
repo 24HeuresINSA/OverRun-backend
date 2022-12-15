@@ -3,7 +3,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 const swaggerDefinition = {
     openapi: '3.0.0',
     info: {
-        title: 'Overun API',
+        title: 'OverRun API',
         version: '1.0.0',
         description:
             'A REST API application made with Express.',
