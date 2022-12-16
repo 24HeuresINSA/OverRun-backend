@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { prisma, saltRounds } from "../server";
 import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
-import { login } from "./login";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 // import { adminInvitationRouter } from "../routes/adminInvitations";
 
 const selectedFields = {
@@ -76,7 +76,6 @@ export const getAthleteById = async (req: Request, res: Response) => {
 };
 
 export const createAthlete = async (req: Request, res: Response) => {
-  console.log(createAthlete);
   const {
     firstName,
     lastName,
@@ -126,14 +125,21 @@ export const createAthlete = async (req: Request, res: Response) => {
         },
         select: selectedFields,
       });
-      login(req, res);
       res.json(athlete);
     } catch (e) {
-      console.log(e);
-      res.status(500);
-      res.json({
-        err: "Internal error.",
-      });
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2014') {
+          res.status(409)
+          res.json({
+            err: "Email or username already exists."
+          });
+        }
+      } else {
+        res.status(500);
+        res.json({
+          err: "Internal error.",
+        });
+      }
     }
   });
 };
