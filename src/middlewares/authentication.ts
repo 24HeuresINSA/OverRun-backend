@@ -10,8 +10,6 @@ export const authenticateJWT = async (
   res: Response,
   next: NextFunction
 ) => {
-
-  console.log(authenticateJWT);
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const accessToken = authHeader.split(" ")[1];
@@ -46,7 +44,6 @@ export const authenticateJWT = async (
               }
             }
             req.user.role.push("AUTHENTICATED_USER");
-            console.log(req.user);
             next();
           }
         } catch (err) {
