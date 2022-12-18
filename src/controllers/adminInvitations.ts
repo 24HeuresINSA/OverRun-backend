@@ -11,7 +11,6 @@ const selectedFields = {
 };
 
 export const getInvitations = async (req: Request, res: Response) => {
-  console.log(getInvitations);
   try {
     const invitations = await prisma.adminInvite.findMany({
       skip: req.paginate.skipIndex,
@@ -39,8 +38,6 @@ export const createInvitation = async (req: Request, res: Response) => {
     return rand() + rand(); // to make it longer
   };
   const token = generateToken();
-  console.log(token);
-  console.log(process.env.FRONTEND_USER_URL);
   const currentDate = new Date();
   bcrypt.hash(token, saltRounds, async (err, hash) => {
     if (err) {
@@ -125,7 +122,6 @@ export const createInvitation = async (req: Request, res: Response) => {
 };
 
 export const acceptInvitation = async (req: Request, res: Response) => {
-  console.log(acceptInvitation);
   const { token, username, password } = req.body;
   const invitationId = parseInt(req.params.id);
   try {

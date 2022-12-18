@@ -9,7 +9,7 @@ import bcrypt from "bcrypt";
 // }
 
 export const createPasswordInvite = async (req: Request, res: Response) => {
-  console.log(createPasswordInvite);
+
   const { email } = req.body;
   try {
     const userExists = await prisma.user.findUnique({
@@ -23,8 +23,7 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
           userId: userExists.id,
         },
       });
-      const token = DEBUG ? "token_debug" : String(secureRandomToken(50));
-      console.log("Token: ", token);
+      const token = String(secureRandomToken(50));
       const currentDate = new Date();
       bcrypt.hash(token, saltRounds, async (err, hash) => {
         if (err) {

@@ -16,6 +16,7 @@ const selectedFields = {
       },
       firstName: true,
       lastName: true,
+      phoneNumber: true,
     },
   },
   team: {
@@ -63,7 +64,6 @@ const selectedFields = {
 };
 
 export const getInscriptions = async (req: Request, res: Response) => {
-  console.log(getInscriptions);
   try {
     const inscriptions = await prisma.inscription.findMany({
       skip: req.paginate.skipIndex,
@@ -82,7 +82,6 @@ export const getInscriptions = async (req: Request, res: Response) => {
 };
 
 export const getInscriptionById = async (req: Request, res: Response) => {
-  console.log(getInscriptionById);
   const inscriptionId = parseInt(req.params.id);
   try {
     const inscription = await prisma.inscription.findUnique({

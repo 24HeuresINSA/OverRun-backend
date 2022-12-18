@@ -15,3 +15,11 @@ inscriptionRouter.get(
     inscriptionCtrl.getInscriptions
 )
 
+inscriptionRouter.get(
+    "/inscriptions/:id", 
+    authenticateJWT, 
+    accessControl(["ADMIN"]),
+    
+    paginate(100),
+    inscriptionCtrl.getInscriptionById
+)

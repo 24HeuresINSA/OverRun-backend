@@ -24,9 +24,6 @@ export const sendEmail = (
     amp  = ""
 ) => {
 
-    console.log(emailAdress)
-    console.log(emailPassword)
-
        if (template){
         text = fs.readFileSync(
           './src/utils/email_templates/text/' + template + ".txt",

@@ -22,11 +22,20 @@ const selectedFields = {
   country: true,
   phoneNumber: true,
   dateOfBirth: true,
-  sex: true
+  sex: true,
+  inscriptions: {
+    select: {
+      edition: {
+        select: {
+          id: true,
+          name: true,
+        },
+      }
+    },
+  },
 };
 
 export const getAthletes = async (req: Request, res: Response) => {
-  console.log(getAthletes);
   try {
     const athletes = await prisma.athlete.findMany({
       skip: req.paginate.skipIndex,
@@ -45,7 +54,6 @@ export const getAthletes = async (req: Request, res: Response) => {
 };
 
 export const getAthleteById = async (req: Request, res: Response) => {
-  console.log(getAthleteById);
   const athleteId = parseInt(req.params.id);
   try {
     if (req.user.role.includes("ADMIN")) {
@@ -88,7 +96,7 @@ export const createAthlete = async (req: Request, res: Response) => {
     username,
     password,
     dateOfBirth,
-    sex
+    sex,
   } = req.body;
   bcrypt.hash(password, saltRounds, async (err, hash) => {
     if (err) {
@@ -120,7 +128,7 @@ export const createAthlete = async (req: Request, res: Response) => {
           city: city,
           country: country,
           phoneNumber: phoneNumber,
-          sex: sex, 
+          sex: sex,
           dateOfBirth: new Date(Date.parse(dateOfBirth)),
         },
         select: selectedFields,
@@ -128,10 +136,10 @@ export const createAthlete = async (req: Request, res: Response) => {
       res.json(athlete);
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
-        if (e.code === 'P2014') {
-          res.status(409)
+        if (e.code === "P2014") {
+          res.status(409);
           res.json({
-            err: "Email or username already exists."
+            err: "Email or username already exists.",
           });
         }
       } else {
@@ -147,26 +155,28 @@ export const createAthlete = async (req: Request, res: Response) => {
 export const updateAthlete = async (req: Request, res: Response) => {
   console.log(updateAthlete);
   const athleteId = parseInt(req.params.id);
-  const { firstName, lastName, address, zipCode, city, country, phoneNumber } = req.body;
+  const { firstName, lastName, address, zipCode, city, country, phoneNumber } =
+    req.body;
   try {
     const athleteData = await prisma.athlete.findUnique({
       where: {
         id: athleteId,
       },
-    })
+    });
     if (req.user.role.includes("ADMIN")) {
       const athlete = await prisma.athlete.update({
         where: {
           id: athleteId,
         },
         data: {
-          firstName: firstName !== null ? firstName : athleteData?.firstName, 
-          lastName: lastName !== null ? lastName : athleteData?.lastName, 
-          address: address !== null ? address: athleteData?.address, 
-          zipCode: zipCode !== null ? zipCode : athleteData?.zipCode, 
-          city: city !== null ? city : athleteData?.city, 
+          firstName: firstName !== null ? firstName : athleteData?.firstName,
+          lastName: lastName !== null ? lastName : athleteData?.lastName,
+          address: address !== null ? address : athleteData?.address,
+          zipCode: zipCode !== null ? zipCode : athleteData?.zipCode,
+          city: city !== null ? city : athleteData?.city,
           country: country !== null ? country : athleteData?.country,
-          phoneNumber: phoneNumber !== null ? phoneNumber : athleteData?.phoneNumber
+          phoneNumber:
+            phoneNumber !== null ? phoneNumber : athleteData?.phoneNumber,
         },
         select: selectedFields,
       });
@@ -184,7 +194,8 @@ export const updateAthlete = async (req: Request, res: Response) => {
           zipCode: zipCode !== null ? zipCode : athleteData?.zipCode,
           city: city !== null ? city : athleteData?.city,
           country: country !== null ? country : athleteData?.country,
-          phoneNumber: phoneNumber !== null ? phoneNumber : athleteData?.phoneNumber,
+          phoneNumber:
+            phoneNumber !== null ? phoneNumber : athleteData?.phoneNumber,
         },
         select: selectedFields,
       });
@@ -206,7 +217,7 @@ export const deleteAthlete = async (req: Request, res: Response) => {
     const athlete = await prisma.athlete.findUnique({
       where: {
         id: athleteId,
-      }
+      },
     });
     const userId = athlete?.userId;
     await prisma.athlete.delete({
@@ -216,14 +227,14 @@ export const deleteAthlete = async (req: Request, res: Response) => {
     });
     const admin = await prisma.admin.findFirst({
       where: {
-        userId: userId
-      }
-    }); 
+        userId: userId,
+      },
+    });
     if (!admin) {
       await prisma.user.delete({
         where: {
           id: userId,
-        }
+        },
       });
     }
     res.json({
