@@ -13,7 +13,7 @@ export const authenticateJWT = async (
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const accessToken = authHeader.split(" ")[1];
-    jwt.verify(accessToken, accessTokenSecret, async (err, user) => {
+    jwt.verify(accessToken, accessTokenSecret, async (err, user: any) => {
       if (err) {
         res.status(403);
         res.json({
