@@ -1,20 +1,20 @@
-import express from "express";
-import { adminRouter } from "./routes/admins";
-import { loginRouter } from "./routes/login";
 import bodyParser from "body-parser";
-import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./utils/swaggerConfig";
-import nodemailer from "nodemailer";
+import express from "express";
 import fileUpload from "express-fileupload";
+import nodemailer from "nodemailer";
+import swaggerUi from "swagger-ui-express";
 import { adminInvitationRouter } from "./routes/adminInvitations";
-import { categoryRouter } from "./routes/categories";
-import { disciplineRouter } from "./routes/disciplines";
+import { adminRouter } from "./routes/admins";
 import { athleteRouter } from "./routes/athletes";
-import { teamRouter } from "./routes/teams";
-import { raceRouter } from "./routes/races";
-import { editionRouter } from "./routes/editions";
+import { categoryRouter } from "./routes/categories";
 import { certificateRouter } from "./routes/certificates";
+import { disciplineRouter } from "./routes/disciplines";
+import { editionRouter } from "./routes/editions";
 import { inscriptionRouter } from "./routes/inscriptions";
+import { loginRouter } from "./routes/login";
+import { raceRouter } from "./routes/races";
+import { teamRouter } from "./routes/teams";
+import { swaggerSpec } from "./utils/swaggerConfig";
 
 const PATH = "/api/v" + (process.env.API_VERSION || "1");
 
