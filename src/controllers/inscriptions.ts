@@ -17,6 +17,7 @@ const selectedFields = {
       firstName: true,
       lastName: true,
       phoneNumber: true,
+      dateOfBirth: true,
     },
   },
   team: {
@@ -40,12 +41,36 @@ const selectedFields = {
     select: {
       id: true,
       name: true,
+      disciplines: {
+        select: {
+          id: true,
+          discipline: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      category: true,
     },
   },
   certificate: {
     select: {
       id: true,
       status: true,
+      statusUpdatedAt: true,
+      statusUpdatedBy: {
+        select: {
+          id: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
     },
   },
   payment: {
@@ -103,58 +128,57 @@ export const getInscriptionById = async (req: Request, res: Response) => {
 export const createInscription = async (req: Request, res: Response) => {
   console.log(createInscription);
   const { editionId, raceId } = req.body;
-    try {
-        const edition = await prisma.edition.findUnique({
-            where: {
-                id: editionId
-            },
+  try {
+    const edition = await prisma.edition.findUnique({
+      where: {
+        id: editionId,
+      },
+    });
+    if (edition !== null && edition?.active === true) {
+      const race = await prisma.race.findUnique({
+        where: {
+          id: raceId,
+        },
+      });
+      if (race !== null && race.editionId === edition.id) {
+        const athlete = await prisma.athlete.findUnique({
+          where: {
+            userId: req.user.id,
+          },
         });
-        if (edition !== null && edition?.active === true) {
-            const race = await prisma.race.findUnique({
-                where: {
-                    id: raceId,
-                },
-            });
-            if (race !== null && race.editionId === edition.id) {
-                const athlete = await prisma.athlete.findUnique({
-                    where: {
-                        userId: req.user.id,
-                    },
-                });
-                const inscriptionAlreadyExists =
-                  await prisma.inscription.findFirst({
-                    where: {
-                      athleteId: athlete?.id,
-                      editionId: editionId,
-                    },
-                  });
-                if (athlete !== null && inscriptionAlreadyExists === null) {
-                    const inscription = await prisma.inscription.create({
-                        data: {
-                            athleteId: athlete.id,
-                            raceId: race.id,
-                            editionId: edition.id,
-                        }
-                    });
-                  res.json(inscription);
-                } else {
-                  res.status(400);
-                  res.json({
-                    err: "Athlete is null or already registered for this edition",
-                  });
-                }
-            } else {
-                res.status(400); 
-                res.json({
-                    "err": "Wrong race selection."
-                })
-            }  
+        const inscriptionAlreadyExists = await prisma.inscription.findFirst({
+          where: {
+            athleteId: athlete?.id,
+            editionId: editionId,
+          },
+        });
+        if (athlete !== null && inscriptionAlreadyExists === null) {
+          const inscription = await prisma.inscription.create({
+            data: {
+              athleteId: athlete.id,
+              raceId: race.id,
+              editionId: edition.id,
+            },
+          });
+          res.json(inscription);
         } else {
-            res.status(400);
-            res.json({
-                "err": "Edition is not active."
-            })
+          res.status(400);
+          res.json({
+            err: "Athlete is null or already registered for this edition",
+          });
         }
+      } else {
+        res.status(400);
+        res.json({
+          err: "Wrong race selection.",
+        });
+      }
+    } else {
+      res.status(400);
+      res.json({
+        err: "Edition is not active.",
+      });
+    }
   } catch (err) {
     console.log(err);
     res.status(500);

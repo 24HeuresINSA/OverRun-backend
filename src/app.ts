@@ -3,6 +3,7 @@ import express from "express";
 import fileUpload from "express-fileupload";
 import nodemailer from "nodemailer";
 import swaggerUi from "swagger-ui-express";
+import { authenticateJWT } from "./middlewares/authentication";
 import { adminInvitationRouter } from "./routes/adminInvitations";
 import { adminRouter } from "./routes/admins";
 import { athleteRouter } from "./routes/athletes";
@@ -54,4 +55,9 @@ app.use(PATH, raceRouter);
 app.use(PATH, editionRouter);
 app.use(PATH, certificateRouter);
 app.use(PATH, inscriptionRouter);
+app.use(
+  `${PATH}/static`,
+  authenticateJWT,
+  express.static(`${__dirname}/../certificates`)
+);
 app.use(PATH, swaggerUi.serve, swaggerUi.setup(swaggerSpec));

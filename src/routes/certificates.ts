@@ -8,11 +8,11 @@ import { paginate } from "../middlewares/pagination";
 export const certificateRouter = express.Router();
 
 certificateRouter.get(
-    "/certificates",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
-    paginate(10),
-    certificateCtrl.getCertificates
+  "/certificates",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paginate(10),
+  certificateCtrl.getCertificates
 );
 
 certificateRouter.post(
@@ -36,7 +36,7 @@ certificateRouter.get(
 
 certificateRouter.post(
   "/certificates/:id",
-authenticateJWT,
+  authenticateJWT,
   accessControl(["ADMIN"]),
   certificateCtrl.updateCertificateStatus
 );
