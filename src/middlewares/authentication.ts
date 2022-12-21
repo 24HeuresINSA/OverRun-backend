@@ -1,4 +1,4 @@
-import { Response, Request, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
 import { prisma } from "../server";
 
@@ -19,6 +19,7 @@ export const authenticateJWT = async (
         res.json({
           err: "Unauthorized.",
         });
+        return;
       }
       if (user) {
         try {

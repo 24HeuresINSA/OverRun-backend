@@ -1,15 +1,15 @@
-import { Admin, Athlete, RefreshToken, User } from "@prisma/client";
-import { Response, Request } from "express";
+import { Admin, Athlete, Prisma, RefreshToken, User } from "@prisma/client";
+import bcrypt from "bcrypt";
+import { Request, Response } from "express";
+import { validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
 import {
-  prisma,
   accessTokenSecret,
   accessTokenTimeout,
+  prisma,
   refreshTokenSecret,
   refreshTokenTimeout,
 } from "../server";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { validationResult } from "express-validator";
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -140,7 +140,7 @@ export const login = async (req: Request, res: Response) => {
         res.json({
           err: "User does not exist",
         });
-        }
+      }
     } catch (err) {
       console.log(err);
       res.status(500);
@@ -170,7 +170,7 @@ export const refreshToken = async (req: Request, res: Response) => {
           },
         });
       if (dbRefresToken === null) {
-        res.status(403);
+        res.status(401);
         res.json({
           err: "Invalid refresh token.",
         });
@@ -184,6 +184,7 @@ export const refreshToken = async (req: Request, res: Response) => {
               res.json({
                 err: err,
               });
+              return;
             }
             const currentDate = new Date();
             const newAccessToken = jwt.sign(
@@ -221,11 +222,18 @@ export const refreshToken = async (req: Request, res: Response) => {
                 expiredAt: currentDate.getTime() + refreshTokenTimeout * 1000,
               },
             });
-            await prisma.refreshToken.delete({
-              where: {
-                refreshToken: refreshToken,
-              },
-            });
+            await prisma.refreshToken
+              .delete({
+                where: {
+                  refreshToken: refreshToken,
+                },
+              })
+              .catch((err) => {
+                if (err instanceof Prisma.PrismaClientKnownRequestError) {
+                  // avoid error if record is already deleted
+                  if (err.code !== "P2025") return err;
+                }
+              });
             res.json({
               accessToken: newAccessToken,
               accessTokenExpiredAt:
