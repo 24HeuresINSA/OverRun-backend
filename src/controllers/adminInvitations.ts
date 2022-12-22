@@ -29,7 +29,6 @@ export const getInvitations = async (req: Request, res: Response) => {
 };
 
 export const createInvitation = async (req: Request, res: Response) => {
-  console.log(createInvitation);
   const { email } = req.body;
   const rand = function () {
     return Math.random().toString(36).substr(2);
