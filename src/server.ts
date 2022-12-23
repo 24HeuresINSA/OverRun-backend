@@ -1,8 +1,15 @@
-// import * as dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
+import axios from "axios";
 import { app } from "./app";
 
-// dotenv.config();
+axios.interceptors.response.use(
+  (res) => {
+    return res;
+  },
+  async (err) => {
+    return err.response;
+  }
+);
 
 export const prisma = new PrismaClient();
 export const accessTokenSecret = String(process.env.ACCESS_TOKEN_SECRET);

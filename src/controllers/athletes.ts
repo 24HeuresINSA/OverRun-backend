@@ -1,8 +1,8 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { prisma, saltRounds } from "../server";
-import bcrypt from "bcrypt";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 // import { adminInvitationRouter } from "../routes/adminInvitations";
 
 const selectedFields = {
@@ -30,7 +30,7 @@ const selectedFields = {
           id: true,
           name: true,
         },
-      }
+      },
     },
   },
 };
@@ -68,7 +68,6 @@ export const getAthleteById = async (req: Request, res: Response) => {
       const athlete = await prisma.athlete.findUnique({
         where: {
           id: athleteId,
-          userId: req.user.id,
         },
         select: selectedFields,
       });

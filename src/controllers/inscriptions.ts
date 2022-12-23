@@ -126,7 +126,6 @@ export const getInscriptionById = async (req: Request, res: Response) => {
 };
 
 export const createInscription = async (req: Request, res: Response) => {
-  console.log(createInscription);
   const { editionId, raceId } = req.body;
   try {
     const edition = await prisma.edition.findUnique({

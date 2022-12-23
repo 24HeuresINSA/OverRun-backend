@@ -15,6 +15,7 @@ import { inscriptionRouter } from "./routes/inscriptions";
 import { loginRouter } from "./routes/login";
 import { raceRouter } from "./routes/races";
 import { teamRouter } from "./routes/teams";
+import { vaRouter } from "./routes/VA";
 import { swaggerSpec } from "./utils/swaggerConfig";
 
 const PATH = "/api/v" + (process.env.API_VERSION || "1");
@@ -55,6 +56,7 @@ app.use(PATH, raceRouter);
 app.use(PATH, editionRouter);
 app.use(PATH, certificateRouter);
 app.use(PATH, inscriptionRouter);
+app.use(PATH, vaRouter);
 app.use(
   `${PATH}/static`,
   authenticateJWT,
