@@ -23,7 +23,10 @@ export const createAdmin = async () => {
                     active: true
                 }
             }); 
-            console.log("Super user created: \n \tpseudo: admin \n \tpassword: "+password)
+            console.log(`Super user created: 
+    pseudo: ${username}
+    email: ${email}
+    password: ${password}`)
         }catch(err) {
             console.log(err)
         }
