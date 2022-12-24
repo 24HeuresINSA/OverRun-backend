@@ -2,5 +2,5 @@
 db.env
 dist
 node_modules
-prisma/migrations
 certificates/*
+*.postman_collection.json
