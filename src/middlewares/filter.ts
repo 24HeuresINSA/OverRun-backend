@@ -1,9 +1,8 @@
-import { Response, Request, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { fusion } from "../utils/concatenateObjects";
 
 export const filter = (fields: Array<Array<any>>) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    console.log(filter);
     req.filter = {};
     for (const field of fields) {
       let fieldname = "";
@@ -49,7 +48,6 @@ export const filter = (fields: Array<Array<any>>) => {
         req.filter = fusion(req.filter, filterDict);
       }
     }
-    console.log(req.filter);
     next();
   };
 };

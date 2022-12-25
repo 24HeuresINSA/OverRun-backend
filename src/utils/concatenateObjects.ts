@@ -4,9 +4,8 @@ export const fusion = (objectA: object, obejctB: object) => {
     objectA &&
     Object.keys(objectA).length !== 0 &&
     obejctB &&
-    Object.keys(obejctB).length !== 0 
+    Object.keys(obejctB).length !== 0
   ) {
-    console.log("Ok");
     for (const [keyA, valueA] of Object.entries(objectA)) {
       for (const [keyB, valueB] of Object.entries(obejctB)) {
         if (keyA === keyB) {
@@ -25,4 +24,4 @@ export const fusion = (objectA: object, obejctB: object) => {
   } else {
     return Object.assign({}, obejctB, objectA);
   }
-}
+};

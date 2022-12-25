@@ -6,43 +6,37 @@ import { filter } from "../middlewares/filter";
 import { paginate } from "../middlewares/pagination";
 import { search } from "../middlewares/search";
 
-
 export const editionRouter = express.Router();
 
-editionRouter.get(
-    "/editions",
-    filter([
-        ["active", "boolean", false],
-    ]),
-    search([
-        ["name", "string", false],
-    ]),
-    paginate(10),
-    editionCtrl.getEditions
-);
+editionRouter.get("/edition/curent", editionCtrl.getCurrentEdition);
 
 editionRouter.get(
-    "/editions/:id",
-    editionCtrl.getEditionById,
+  "/editions",
+  filter([["active", "boolean", false]]),
+  search([["name", "string", false]]),
+  paginate(10),
+  editionCtrl.getEditions
 );
+
+editionRouter.get("/editions/:id", editionCtrl.getEditionById);
 
 editionRouter.post(
-    "/editions",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
-    editionCtrl.createEdition,
+  "/editions",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  editionCtrl.createEdition
 );
 
 editionRouter.put(
-    "/editions/:id",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
-    editionCtrl.updateEdition,
+  "/editions/:id",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  editionCtrl.updateEdition
 );
 
 editionRouter.delete(
-    "/editions/:id",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
-    editionCtrl.deleteEdition,
+  "/editions/:id",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  editionCtrl.deleteEdition
 );

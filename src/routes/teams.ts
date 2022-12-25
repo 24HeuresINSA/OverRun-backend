@@ -32,7 +32,7 @@ teamRouter.get(
   "/teams/light",
   authenticateJWT,
   filter([
-    [["editionId", "id"], "number", true, ["edition", "id"]],
+    [["editionId", "id"], "number", true, ["edition", "is"]],
     [
       [
         "maxParticipants",

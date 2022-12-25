@@ -11,13 +11,11 @@ export const raceRouter = express.Router();
 raceRouter.get(
   "/races",
   filter([
-    [["editionId", "id"], "number", true, ["edition", "id"]],
+    [["editionId", "id"], "number", true, ["edition", "is"]],
     [["categoryId", "id"], "number", true, ["category"]],
     ["maxTeamMembers", "number", true, ["category"]],
   ]),
-  search([
-    ["name", "string", false],
-  ]),
+  search([["name", "string", false]]),
   paginate(10),
   raceCtrl.getRaces
 );
