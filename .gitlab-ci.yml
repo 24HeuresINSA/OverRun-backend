@@ -17,6 +17,20 @@ build:
   only:
     - main
 
+MR-build:
+  stage: Build
+  image: docker:latest
+  services:
+     - docker:dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE .
+  only:
+    - merge_requests
+
+
+
 deploy:
   image: curlimages/curl
   stage: deploy
