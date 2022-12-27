@@ -158,13 +158,13 @@ export const createTeam = async (req: Request, res: Response) => {
                     createNewTeam = true;
                   } else {
                     res.status(400);
-                    res.json({
+                    return res.json({
                       err: "Athlete is registered in another race.",
                     });
                   }
                 } else {
                   res.status(400);
-                  res.json({
+                  return res.json({
                     err: "AThlete is already a team member.",
                   });
                 }
@@ -305,7 +305,7 @@ export const joinTeam = async (req: Request, res: Response) => {
         if (team.edition.active === true) {
           let inscription = await prisma.inscription.findFirst({
             where: {
-              athleteId: athlete.userId,
+              athleteId: athlete.id,
               editionId: team.editionId,
             },
           });
@@ -351,7 +351,7 @@ export const joinTeam = async (req: Request, res: Response) => {
                   }
                 }
                 if (created) {
-                  res.status(400);
+                  res.status(201);
                   res.json(
                     await prisma.team.findUnique({
                       where: {

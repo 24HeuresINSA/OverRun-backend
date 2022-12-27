@@ -58,7 +58,6 @@ export const getRaces = async (req: Request, res: Response) => {
 };
 
 export const getRaceById = async (req: Request, res: Response) => {
-  console.log(getRaceById);
   const raceId = parseInt(req.params.id);
   try {
     const race = await prisma.race.findUnique({

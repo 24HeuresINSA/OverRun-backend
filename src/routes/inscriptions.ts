@@ -7,19 +7,25 @@ import { paginate } from "../middlewares/pagination";
 export const inscriptionRouter = express.Router();
 
 inscriptionRouter.get(
-    "/inscriptions", 
-    authenticateJWT, 
-    accessControl(["ADMIN"]),
-    
-    paginate(100),
-    inscriptionCtrl.getInscriptions
-)
+  "/inscriptions",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+
+  paginate(100),
+  inscriptionCtrl.getInscriptions
+);
 
 inscriptionRouter.get(
-    "/inscriptions/:id", 
-    authenticateJWT, 
-    accessControl(["ADMIN"]),
-    
-    paginate(100),
-    inscriptionCtrl.getInscriptionById
-)
+  "/inscriptions/:id",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+
+  paginate(100),
+  inscriptionCtrl.getInscriptionById
+);
+
+inscriptionRouter.post(
+  "/inscriptions",
+  authenticateJWT,
+  inscriptionCtrl.createInscription
+);

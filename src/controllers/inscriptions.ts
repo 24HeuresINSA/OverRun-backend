@@ -159,7 +159,7 @@ export const createInscription = async (req: Request, res: Response) => {
               editionId: edition.id,
             },
           });
-          res.json(inscription);
+          res.status(201).json(inscription);
         } else {
           res.status(400);
           res.json({
