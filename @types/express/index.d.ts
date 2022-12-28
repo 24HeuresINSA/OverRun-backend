@@ -3,6 +3,7 @@ declare namespace Express {
     user: {
       id: number;
       role: string[];
+      athleteId: number;
     };
     paginate: {
       page: number;

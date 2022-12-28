@@ -1,10 +1,10 @@
-import express from 'express';
+import express from "express";
 import * as athleteCtrl from "../controllers/athletes";
-import { accessControl } from '../middlewares/accessControl';
-import { authenticateJWT } from '../middlewares/authentication';
-import { filter } from '../middlewares/filter';
-import { paginate } from '../middlewares/pagination';
-import { search } from '../middlewares/search';
+import { accessControl } from "../middlewares/accessControl";
+import { authenticateJWT } from "../middlewares/authentication";
+import { filter } from "../middlewares/filter";
+import { paginate } from "../middlewares/pagination";
+import { search } from "../middlewares/search";
 
 export const athleteRouter = express.Router();
 
@@ -66,49 +66,37 @@ export const athleteRouter = express.Router();
  *           description: The athlete phone number
  *           example: 0472437000
  *           required: true
- *           
+ *
  */
 
 athleteRouter.get(
-    "/athletes",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
-    filter([
-        [["editionId", "id"], "number", true, ["inscription", "edition"]]
-    ]),
-    search([
-        ["email", "string", true, ["user"]],
-        ["username", "string", true, ["user"]],
-        ["firstName", "string", false],
-        ["lastName", "string", false],
-        [["teamName", "name"], "string", true, ["team"]],
-        [["raceName", "name"], "string", true, ["inscription", "race"]],
-        [["editionName", "name"], "string", true, ["inscription", "edition"]]
-    ]),
-    paginate(10),
-    athleteCtrl.getAthletes
+  "/athletes",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  filter([[["editionId", "id"], "number", true, ["inscription", "edition"]]]),
+  search([
+    ["email", "string", true, ["user"]],
+    ["username", "string", true, ["user"]],
+    ["firstName", "string", false],
+    ["lastName", "string", false],
+    [["teamName", "name"], "string", true, ["team"]],
+    [["raceName", "name"], "string", true, ["inscription", "race"]],
+    [["editionName", "name"], "string", true, ["inscription", "edition"]],
+  ]),
+  paginate(10),
+  athleteCtrl.getAthletes
 );
+athleteRouter.get("/athletes/me", authenticateJWT, athleteCtrl.getAthleteMe);
 
-athleteRouter.get(
-    "/athletes/:id",
-    authenticateJWT,
-    athleteCtrl.getAthleteById
-); 
+athleteRouter.get("/athletes/:id", authenticateJWT, athleteCtrl.getAthleteById);
 
-athleteRouter.post(
-    "/athletes",
-    athleteCtrl.createAthlete
-);
+athleteRouter.post("/athletes", athleteCtrl.createAthlete);
 
-athleteRouter.put(
-    "/athletes/:id",
-    authenticateJWT,
-    athleteCtrl.updateAthlete
-);
+athleteRouter.put("/athletes/:id", authenticateJWT, athleteCtrl.updateAthlete);
 
 athleteRouter.delete(
-    "/athletes/:id",
-    authenticateJWT,
-    accessControl(["ADMIN"]),
-    athleteCtrl.deleteAthlete
+  "/athletes/:id",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  athleteCtrl.deleteAthlete
 );

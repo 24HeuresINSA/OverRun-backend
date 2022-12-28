@@ -32,6 +32,7 @@ export const authenticateJWT = async (
             req.user = {
               id: Number(user.id),
               role: [],
+              athleteId: Number(user.athleteId),
             };
             const isAdmin = await prisma.admin.findUnique({
               where: {

@@ -35,6 +35,39 @@ const selectedFields = {
   },
 };
 
+const selectedFieldsForMe = {
+  ...selectedFields,
+  inscriptions: {
+    select: {
+      edition: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      id: true,
+      validated: true,
+      va: {
+        select: {
+          id: true,
+        },
+      },
+      certificate: {
+        select: {
+          id: true,
+          status: true,
+        },
+      },
+      race: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  },
+};
+
 export const getAthletes = async (req: Request, res: Response) => {
   try {
     const athletes = await prisma.athlete.findMany({
@@ -73,6 +106,25 @@ export const getAthleteById = async (req: Request, res: Response) => {
       });
       res.json(athlete);
     }
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const getAthleteMe = async (req: Request, res: Response) => {
+  const id = req.user.athleteId;
+  try {
+    const athlete = await prisma.athlete.findUnique({
+      where: {
+        id,
+      },
+      select: selectedFieldsForMe,
+    });
+    res.json(athlete);
   } catch (err) {
     console.log(err);
     res.status(500);
