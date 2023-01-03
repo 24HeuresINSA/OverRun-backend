@@ -45,6 +45,12 @@ const selectedFieldsForMe = {
           name: true,
         },
       },
+      team: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       id: true,
       validated: true,
       va: {

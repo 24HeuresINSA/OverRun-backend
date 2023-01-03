@@ -45,6 +45,7 @@ const selectedFields = {
       adminInscription: {
         select: {
           id: true,
+          athleteId: true,
         },
       },
     },
