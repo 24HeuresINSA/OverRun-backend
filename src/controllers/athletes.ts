@@ -62,6 +62,7 @@ const selectedFieldsForMe = {
         select: {
           id: true,
           status: true,
+          filename: true,
         },
       },
       race: {
