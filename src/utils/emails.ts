@@ -25,15 +25,15 @@ export const sendEmail = (
 ) => {
   if (template) {
     text = fs.readFileSync(
-      "./src/utils/email_templates/text/" + template + ".txt",
+      `${__dirname}/utils/email_templates/text/${template}.txt`,
       "utf-8"
     );
     html = fs.readFileSync(
-      "./src/utils/email_templates/html/" + template + ".html",
+      `${__dirname}/utils/email_templates/text/${template}.html`,
       "utf-8"
     );
     amp = fs.readFileSync(
-      "./src/utils/email_templates/amp/" + template + ".html",
+      `${__dirname}/utils/email_templates/text/${template}..html`,
       "utf-8"
     );
   }
