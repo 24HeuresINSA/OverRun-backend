@@ -33,7 +33,7 @@ export const sendEmail = (
       "utf-8"
     );
     amp = fs.readFileSync(
-      `${__dirname}/email_templates/amp/${template}..html`,
+      `${__dirname}/email_templates/amp/${template}.html`,
       "utf-8"
     );
   }
