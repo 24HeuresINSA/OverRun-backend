@@ -29,11 +29,11 @@ export const sendEmail = (
       "utf-8"
     );
     html = fs.readFileSync(
-      `${__dirname}/email_templates/text/${template}.html`,
+      `${__dirname}/email_templates/html/${template}.html`,
       "utf-8"
     );
     amp = fs.readFileSync(
-      `${__dirname}/email_templates/text/${template}..html`,
+      `${__dirname}/email_templates/amp/${template}..html`,
       "utf-8"
     );
   }
