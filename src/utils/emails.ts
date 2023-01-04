@@ -40,9 +40,9 @@ export const sendEmail = (
 
   if (variables) {
     for (const [key, value] of Object.entries(variables)) {
-      text = text.replace("{{ " + key + " }}", String(value));
-      html = html.replace("{{ " + key + " }}", String(value));
-      amp = amp.replace("{{ " + key + " }}", String(value));
+      text = text.replace(new RegExp("{{ " + key + " }}", "g"), String(value));
+      html = html.replace(new RegExp("{{ " + key + " }}", "g"), String(value));
+      amp = amp.replace(new RegExp("{{ " + key + " }}", "g"), String(value));
     }
   }
 

@@ -6,19 +6,33 @@
   ></div>
 
   <div id="main" style="padding: 20px">
-    <p>Salut,</p>
+    <p>Bonjour {{ firstName }},</p>
 
     <p>
-      Tu viens d'être invité à rejoindre l'équipe des courses des 24 heures de
-      l'INSA en temps qu'administrateur.
+      L'équipe des courses des 24 heures de l'INSA a le plaisir de vous compter parmi ses participants. <br />
+      Vous êtes maintenant inscrit sur notre plateforme OverRun. <br/>
+      Vous pouvez dès à présent vous connecter sur OverRun pour accéder à votre espace personnel : 
+      <br />
+      <a
+      id="link-button"
+      href="{{ url }}/login"
+      target="_blank"
+      style="
+        background-color: #2b3180;
+        padding: 1rem 1rem 1rem 1rem;
+        border-radius: 0.5rem;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        margin: 1rem;
+      "
+      >Me connecter</a
+      >
     </p>
     <p>
-      Si ce message t'est bien adressé, rends-toi sur le lien suivant pour
-      finaliser la création de ton compte sur OverRun:
-      <a href="{{ url }}{{ token }}&id={{ id }}">cliquez-ici</a>.
+      Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier-coller le lien suivant dans votre navigateur : <br/>
+      <a href="{{ url }}/login">{{ url }}/login</a>
     </p>
-    <p>Glouglou,</p>
-    <p>L'équipe des courses (aka les pédales).</p>
   </div>
 
   <div

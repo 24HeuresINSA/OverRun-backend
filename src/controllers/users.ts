@@ -1,15 +1,14 @@
-import { DEBUG, emailTimeout, prisma, saltRounds } from "../server";
-import { Request, Response } from "express";
-import { secureRandomToken } from "../utils/secureRandomToken";
-import { sendEmail } from "../utils/emails";
 import bcrypt from "bcrypt";
+import { Request, Response } from "express";
+import { emailTimeout, prisma, saltRounds } from "../server";
+import { sendEmail } from "../utils/emails";
+import { secureRandomToken } from "../utils/secureRandomToken";
 
 // export const getUsers = async (req: Request, res: Response) => {
- 
+
 // }
 
 export const createPasswordInvite = async (req: Request, res: Response) => {
-
   const { email } = req.body;
   try {
     const userExists = await prisma.user.findUnique({
@@ -62,7 +61,6 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
 };
 
 export const updatePassword = async (req: Request, res: Response) => {
-  console.log(updatePassword);
   const inviteId = parseInt(req.params.id);
   const { token, password } = req.body;
   try {
@@ -71,15 +69,15 @@ export const updatePassword = async (req: Request, res: Response) => {
         id: inviteId,
       },
     });
-    
-    const valideToken = await bcrypt.compare(token, String(invite?.token)); 
+
+    const valideToken = await bcrypt.compare(token, String(invite?.token));
     if (valideToken) {
       bcrypt.hash(password, saltRounds, async (err, hash) => {
         if (err) {
           res.status(500);
           res.json({
             err: "Internal error.",
-          })
+          });
         } else {
           await prisma.user.update({
             where: {
@@ -90,14 +88,14 @@ export const updatePassword = async (req: Request, res: Response) => {
             },
           });
           res.json({
-            success: "Password successfully updated."
+            success: "Password successfully updated.",
           });
         }
-      })
+      });
     } else {
       res.json(400);
       res.json({
-        err: "Invalid token."
+        err: "Invalid token.",
       });
     }
   } catch (err) {

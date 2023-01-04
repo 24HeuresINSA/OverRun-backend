@@ -1,0 +1,7 @@
+Bonjour {{ firstName }},
+
+L'équipe des courses des 24 heures de l'INSA a le plaisir de vous compter parmi ses participants.
+Vous êtes maintenant inscrit sur notre plateforme OverRun. 
+Vous pouvez dès à présent vous connecter sur OverRun pour accéder à votre espace personnel : 
+{{ url }}/login
+

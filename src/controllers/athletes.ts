@@ -2,6 +2,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { prisma, saltRounds } from "../server";
+import { sendEmail } from "../utils/emails";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 // import { adminInvitationRouter } from "../routes/adminInvitations";
 
@@ -160,7 +161,7 @@ export const createAthlete = async (req: Request, res: Response) => {
     if (err) {
       console.error(err);
       res.status(500);
-      res.json({
+      return res.json({
         err: "Internal error.",
       });
     }
@@ -191,6 +192,16 @@ export const createAthlete = async (req: Request, res: Response) => {
         },
         select: selectedFields,
       });
+
+      sendEmail(
+        email,
+        "Confirmation d'inscription à OverRun",
+        "WelecomMessage",
+        {
+          firstName: firstName,
+          url: process.env.FRONTEND_URL,
+        }
+      );
       res.json(athlete);
     } catch (e) {
       if (e instanceof PrismaClientKnownRequestError) {
@@ -201,6 +212,7 @@ export const createAthlete = async (req: Request, res: Response) => {
           });
         }
       } else {
+        console.log(e);
         res.status(500);
         res.json({
           err: "Internal error.",
@@ -269,7 +281,6 @@ export const updateAthlete = async (req: Request, res: Response) => {
 };
 
 export const deleteAthlete = async (req: Request, res: Response) => {
-  console.log(deleteAthlete);
   const athleteId = parseInt(req.params.id);
   try {
     const athlete = await prisma.athlete.findUnique({

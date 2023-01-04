@@ -42,7 +42,7 @@ export const createInvitation = async (req: Request, res: Response) => {
     if (err) {
       console.error(err);
       res.status(500);
-      res.json({
+      return res.json({
         err: "Internal error.",
       });
     }
@@ -78,7 +78,7 @@ export const createInvitation = async (req: Request, res: Response) => {
             });
             sendEmail(email, "Invitation à rejoindre OverRun", "AdminInvite", {
               token: token,
-              url: process.env.FRONTEND_USER_URL + "admin?token=",
+              url: process.env.FRONTEND_URL + "admin?token=",
               id: invitation.id,
             });
             res.json(invitation);
@@ -93,7 +93,7 @@ export const createInvitation = async (req: Request, res: Response) => {
             });
             sendEmail(email, "Invitation à rejoindre OverRun", "AdminInvite", {
               token: token,
-              url: process.env.FRONTEND_USER_URL + "admin?token=",
+              url: process.env.FRONTEND_URL + "admin?token=",
               id: invitation.id,
             });
             res.json(invitation);
