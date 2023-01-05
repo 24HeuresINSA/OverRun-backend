@@ -116,15 +116,18 @@ export const updateEdition = async (req: Request, res: Response) => {
     const data = {
       name: name !== null ? name : edition?.name,
       startDate:
-        startDate !== null ? new Date(1000 * startDate) : edition?.startDate,
-      endDate: endDate !== null ? new Date(1000 * endDate) : edition?.endDate,
+        startDate !== null
+          ? new Date(startDate).toISOString()
+          : edition?.startDate,
+      endDate:
+        endDate !== null ? new Date(endDate).toISOString() : edition?.endDate,
       registrationStartDate:
         registrationStartDate !== null
-          ? new Date(1000 * registrationStartDate)
+          ? new Date(registrationStartDate).toISOString()
           : edition?.registrationStartDate,
       registrationEndDate:
         registrationEndDate !== null
-          ? new Date(1000 * registrationEndDate)
+          ? new Date(registrationEndDate).toISOString()
           : edition?.registrationEndDate,
       active: active !== null ? active : edition?.active,
     };
