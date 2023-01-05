@@ -2,5 +2,5 @@
 db.env
 dist
 node_modules
-certificates/*
+src/certificates/*
 *.postman_collection.json

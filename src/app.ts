@@ -60,6 +60,6 @@ app.use(PATH, vaRouter);
 app.use(
   `${PATH}/static`,
   authenticateJWT,
-  express.static(`${__dirname}/../certificates`)
+  express.static(`${__dirname}/certificates`)
 );
 app.use(PATH, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
