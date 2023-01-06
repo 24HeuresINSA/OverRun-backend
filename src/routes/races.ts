@@ -16,7 +16,7 @@ raceRouter.get(
     ["maxTeamMembers", "number", true, ["category"]],
   ]),
   search([["name", "string", false]]),
-  paginate(10),
+  paginate(),
   raceCtrl.getRaces
 );
 

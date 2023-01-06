@@ -17,7 +17,7 @@ categoryRouter.get(
     [["editionId", "id"], "number", true, ["edition", "is"]],
   ]),
   search([["name", "string", false]]),
-  paginate(10),
+  paginate(),
   categoryCtrl.getCategories
 );
 
@@ -29,7 +29,7 @@ categoryRouter.get(
     [["editionId", "id"], "number", true, ["edition", "is"]],
   ]),
   search([["name", "string", false]]),
-  paginate(10),
+  paginate(),
   categoryCtrl.getCategoriesLight
 );
 

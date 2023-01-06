@@ -14,7 +14,7 @@ editionRouter.get(
   "/editions",
   filter([["active", "boolean", false]]),
   search([["name", "string", false]]),
-  paginate(10),
+  paginate(),
   editionCtrl.getEditions
 );
 

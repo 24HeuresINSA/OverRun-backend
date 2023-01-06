@@ -20,7 +20,7 @@ vaRouter.get(
     ],
     [["athlete_lastname", "lastName"]],
   ]),
-  paginate(10),
+  paginate(),
   vaCtrl.getVAs
 );
 

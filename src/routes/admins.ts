@@ -1,9 +1,9 @@
 import express from "express";
 import * as adminCtrl from "../controllers/admins";
-import { authenticateJWT } from "../middlewares/authentication";
 import { accessControl } from "../middlewares/accessControl";
-import { paginate } from "../middlewares/pagination";
+import { authenticateJWT } from "../middlewares/authentication";
 import { filter } from "../middlewares/filter";
+import { paginate } from "../middlewares/pagination";
 import { search } from "../middlewares/search";
 
 export const adminRouter = express.Router();
@@ -72,7 +72,7 @@ adminRouter.get(
     ["email", "string", true, ["user"]],
     ["username", "string", true, ["user"]],
   ]),
-  paginate(10),
+  paginate(),
   adminCtrl.getAdmins
 );
 
@@ -89,5 +89,3 @@ adminRouter.delete(
   accessControl(["ADMIN"]),
   adminCtrl.deleteAdmin
 );
-
-

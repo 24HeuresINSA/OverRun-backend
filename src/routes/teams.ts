@@ -24,7 +24,7 @@ teamRouter.get(
     ],
   ]),
   search([["name", "string", false]]),
-  paginate(10),
+  paginate(),
   teamCtrl.getTeams
 );
 
@@ -43,7 +43,7 @@ teamRouter.get(
     ],
   ]),
   search([["name", "string", false]]),
-  paginate(10),
+  paginate(),
   teamCtrl.getTeamsLight
 );
 

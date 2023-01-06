@@ -14,7 +14,7 @@ disciplineRouter.get(
   accessControl(["ADMIN"]),
   filter([[["editionId", "id"], "number", true, ["edition", "is"]]]),
   search([["name", "string", false]]),
-  paginate(10),
+  paginate(),
   disciplineCtrl.getDisciplines
 );
 

@@ -11,7 +11,7 @@ inscriptionRouter.get(
   authenticateJWT,
   accessControl(["ADMIN"]),
 
-  paginate(100),
+  paginate(),
   inscriptionCtrl.getInscriptions
 );
 
@@ -20,7 +20,7 @@ inscriptionRouter.get(
   authenticateJWT,
   accessControl(["ADMIN"]),
 
-  paginate(100),
+  paginate(),
   inscriptionCtrl.getInscriptionById
 );
 

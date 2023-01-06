@@ -9,7 +9,7 @@ export const jsonPaginateResponse = (array: Array<any>, req: Request) => {
     page: req.paginate.page,
     elements:
       array.length > req.paginate.limit ? req.paginate.limit : array.length,
-    next: array.length > req.paginate.limit ? true : false,
-    previous: req.paginate.page === 1 ? false : true,
+    next: array.length > req.paginate.limit,
+    previous: req.paginate.page !== 1,
   };
 };

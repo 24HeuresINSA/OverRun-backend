@@ -83,7 +83,7 @@ athleteRouter.get(
     [["raceName", "name"], "string", true, ["inscription", "race"]],
     [["editionName", "name"], "string", true, ["inscription", "edition"]],
   ]),
-  paginate(10),
+  paginate(),
   athleteCtrl.getAthletes
 );
 athleteRouter.get("/athletes/me", authenticateJWT, athleteCtrl.getAthleteMe);

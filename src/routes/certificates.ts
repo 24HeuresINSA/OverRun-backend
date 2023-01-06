@@ -11,7 +11,7 @@ certificateRouter.get(
   "/certificates",
   authenticateJWT,
   accessControl(["ADMIN"]),
-  paginate(10),
+  paginate(),
   certificateCtrl.getCertificates
 );
 
