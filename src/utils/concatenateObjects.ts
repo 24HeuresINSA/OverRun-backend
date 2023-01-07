@@ -1,13 +1,13 @@
-export const fusion = (objectA: object, obejctB: object) => {
+export const fusion = (objectA: object, objectB: object) => {
   const newObject: { [k: string]: any } = {};
   if (
     objectA &&
     Object.keys(objectA).length !== 0 &&
-    obejctB &&
-    Object.keys(obejctB).length !== 0
+    objectB &&
+    Object.keys(objectB).length !== 0
   ) {
     for (const [keyA, valueA] of Object.entries(objectA)) {
-      for (const [keyB, valueB] of Object.entries(obejctB)) {
+      for (const [keyB, valueB] of Object.entries(objectB)) {
         if (keyA === keyB) {
           if (typeof valueA === "object" && typeof valueB === "object") {
             newObject[keyA] = fusion(valueA, valueB);
@@ -22,6 +22,6 @@ export const fusion = (objectA: object, obejctB: object) => {
     }
     return newObject;
   } else {
-    return Object.assign({}, obejctB, objectA);
+    return Object.assign({}, objectB, objectA);
   }
 };

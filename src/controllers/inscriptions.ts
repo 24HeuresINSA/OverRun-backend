@@ -90,54 +90,53 @@ const selectedFields = {
 };
 
 function searchingFields(searchString: string): Prisma.InscriptionWhereInput {
-  return searchString !== undefined
-    ? {
-        OR: [
-          {
-            athlete: {
-              user: {
-                username: {
-                  contains: searchString,
-                  mode: "insensitive",
-                },
-              },
+  if (!searchString || searchString === "") return {};
+  return {
+    OR: [
+      {
+        athlete: {
+          user: {
+            username: {
+              contains: searchString,
+              mode: "insensitive",
             },
           },
-          {
-            athlete: {
-              user: {
-                email: {
-                  contains: searchString,
-                  mode: "insensitive",
-                },
-              },
+        },
+      },
+      {
+        athlete: {
+          user: {
+            email: {
+              contains: searchString,
+              mode: "insensitive",
             },
           },
-          {
-            athlete: {
-              firstName: { contains: searchString, mode: "insensitive" },
-            },
+        },
+      },
+      {
+        athlete: {
+          firstName: { contains: searchString, mode: "insensitive" },
+        },
+      },
+      {
+        athlete: {
+          lastName: { contains: searchString, mode: "insensitive" },
+        },
+      },
+      {
+        team: {
+          name: {
+            contains: searchString,
+            mode: "insensitive",
           },
-          {
-            athlete: {
-              lastName: { contains: searchString, mode: "insensitive" },
-            },
-          },
-          {
-            team: {
-              name: {
-                contains: searchString,
-                mode: "insensitive",
-              },
-            },
-          },
-        ],
-      }
-    : {};
+        },
+      },
+    ],
+  };
 }
 
 export const getInscriptions = async (req: Request, res: Response) => {
-  const searchString = String(req.query.search);
+  const searchString = req.query.search as string;
   try {
     const inscriptions = await prisma.inscription.findMany({
       skip: req.paginate.skipIndex,

@@ -76,9 +76,9 @@ athleteRouter.get(
   filter([[["editionId", "id"], "number", true, ["inscription", "edition"]]]),
   search([
     ["email", "string", true, ["user"]],
-    // ["username", "string", true, ["user"]],
-    // ["firstName", "string", false],
-    // ["lastName", "string", false],
+    ["username", "string", true, ["user"]],
+    ["firstName", "string", false],
+    ["lastName", "string", false],
   ]),
   paginate(),
   athleteCtrl.getAthletes

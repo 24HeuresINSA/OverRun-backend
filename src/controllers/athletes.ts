@@ -78,45 +78,44 @@ const selectedFieldsForMe = {
 };
 
 function searchingFields(searchString: string): Prisma.AthleteWhereInput {
-  return searchString !== undefined
-    ? {
-        OR: [
-          {
-            firstName: {
-              contains: searchString,
-              mode: "insensitive",
-            },
+  if (!searchString || searchString === "") return {};
+  return {
+    OR: [
+      {
+        firstName: {
+          contains: searchString,
+          mode: "insensitive",
+        },
+      },
+      {
+        lastName: {
+          contains: searchString,
+          mode: "insensitive",
+        },
+      },
+      {
+        user: {
+          username: {
+            contains: searchString,
+            mode: "insensitive",
           },
-          {
-            lastName: {
-              contains: searchString,
-              mode: "insensitive",
-            },
+        },
+      },
+      {
+        user: {
+          email: {
+            contains: searchString,
+            mode: "insensitive",
           },
-          {
-            user: {
-              username: {
-                contains: searchString,
-                mode: "insensitive",
-              },
-            },
-          },
-          {
-            user: {
-              email: {
-                contains: searchString,
-                mode: "insensitive",
-              },
-            },
-          },
-        ],
-      }
-    : {};
+        },
+      },
+    ],
+  };
 }
 
 export const getAthletes = async (req: Request, res: Response) => {
   try {
-    const searchString = String(req.query.search);
+    const searchString = req.query.search as string;
     const athletes = await prisma.athlete.findMany({
       skip: req.paginate.skipIndex,
       take: req.paginate.limit,
