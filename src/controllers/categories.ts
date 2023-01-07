@@ -108,7 +108,7 @@ export const createCategroy = async (req: Request, res: Response) => {
 
 export const updateCategory = async (req: Request, res: Response) => {
   const categoryId = parseInt(req.params.id);
-  const { description, minTeamMembers, maxTeamMembers } = req.body;
+  const { name, description, minTeamMembers, maxTeamMembers } = req.body;
   try {
     const category = await prisma.category.findUnique({
       where: {
@@ -116,6 +116,7 @@ export const updateCategory = async (req: Request, res: Response) => {
       },
     });
     const data = {
+      name: name !== null ? name : category?.name,
       description: description !== null ? description : category?.description,
       minTeamMembers:
         minTeamMembers !== null ? minTeamMembers : category?.minTeamMembers,

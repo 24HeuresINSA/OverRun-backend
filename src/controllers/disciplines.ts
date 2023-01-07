@@ -43,7 +43,6 @@ export const getDisciplines = async (req: Request, res: Response) => {
 };
 
 export const getDisciplineById = async (req: Request, res: Response) => {
-  console.log(getDisciplineById);
   const disciplineId = parseInt(req.params.id);
   try {
     const discipline = await prisma.discipline.findUnique({
@@ -63,7 +62,6 @@ export const getDisciplineById = async (req: Request, res: Response) => {
 };
 
 export const createDiscipline = async (req: Request, res: Response) => {
-  console.log(createDiscipline);
   const { name, description, editionId } = req.body;
   try {
     const discipline = await prisma.discipline.create({
@@ -86,15 +84,16 @@ export const createDiscipline = async (req: Request, res: Response) => {
 
 export const updateDiscipline = async (req: Request, res: Response) => {
   const disciplineId = parseInt(req.params.id);
-  if (req.body.id) {
-    delete req.body.id;
-  }
+  const { name, description } = req.body;
   try {
     const discipline = await prisma.discipline.update({
       where: {
         id: disciplineId,
       },
-      data: req.body,
+      data: {
+        name,
+        description,
+      },
       select: selectedFields,
     });
     res.json(discipline);
