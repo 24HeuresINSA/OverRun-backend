@@ -36,6 +36,7 @@ export const search = (fields: Array<Array<any>>) => {
         // }
         searchDict[fieldname] = {
           contains: queryValue,
+          mode: "insensitive",
         };
 
         if (nested) {
