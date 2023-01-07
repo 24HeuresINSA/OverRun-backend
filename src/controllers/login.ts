@@ -75,7 +75,7 @@ export const login = async (req: Request, res: Response) => {
             athleteId = athlete.id;
           } else {
             res.status(401);
-            res.json({
+            return res.json({
               err: "User has no role",
             });
           }
@@ -131,13 +131,13 @@ export const login = async (req: Request, res: Response) => {
           });
         } else {
           res.status(400);
-          res.json({
+          return res.json({
             err: "Invalid Password",
           });
         }
       } else {
         res.status(401);
-        res.json({
+        return res.json({
           err: "User does not exist",
         });
       }
@@ -285,7 +285,7 @@ export const logout = async (req: Request, res: Response) => {
           info: "Logout successful",
         });
       } else {
-        res.json({
+        return res.json({
           err: "Invalid refresh token.",
         });
       }
