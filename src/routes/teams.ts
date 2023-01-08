@@ -13,7 +13,7 @@ teamRouter.get(
   authenticateJWT,
   accessControl(["ADMIN"]),
   filter([
-    [["editionId", "id"], "number", true, ["edition", "id"]],
+    [["editionId", "id"], "number", true, ["edition", "is"]],
     [
       [
         "maxParticipants",

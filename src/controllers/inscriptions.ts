@@ -142,7 +142,7 @@ export const getInscriptions = async (req: Request, res: Response) => {
       skip: req.paginate.skipIndex,
       take: req.paginate.limit + 1,
       // where: Object.assign({}, req.search, req.filter),
-      where: searchingFields(searchString),
+      where: { ...searchingFields(searchString), ...req.filter },
       select: selectedFields,
     });
     res.json(jsonPaginateResponse(inscriptions, req));
