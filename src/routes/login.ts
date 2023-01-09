@@ -19,8 +19,4 @@ loginRouter.post(
   loginCtrl.refreshToken
 );
 
-loginRouter.post(
-    "/logout", 
-    body("refreshToken").notEmpty(),
-    loginCtrl.logout
-);
+loginRouter.post("/logout", body("refreshToken").notEmpty(), loginCtrl.logout);

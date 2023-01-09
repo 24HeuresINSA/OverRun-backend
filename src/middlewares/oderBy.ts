@@ -2,11 +2,11 @@ import { Response, Request, NextFunction } from "express";
 
 export const orderBy = async (allowedFields: Array<string>) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    console.log(orderBy)
+    console.log(orderBy);
     const requestedField = String(req.query.orderColumn);
     let key = "id";
     let value = "desc";
-      
+
     if (requestedField && allowedFields.includes(requestedField)) {
       key = requestedField;
     }
