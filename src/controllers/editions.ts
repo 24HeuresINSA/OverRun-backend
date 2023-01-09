@@ -79,10 +79,10 @@ export const createEdition = async (req: Request, res: Response) => {
     const edition = await prisma.edition.create({
       data: {
         name: name,
-        startDate: new Date(startDate * 1000),
-        endDate: new Date(endDate * 1000),
-        registrationStartDate: new Date(registrationStartDate * 1000),
-        registrationEndDate: new Date(registrationEndDate * 1000),
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        registrationStartDate: new Date(registrationStartDate),
+        registrationEndDate: new Date(registrationEndDate),
         active: active,
       },
       select: selectedFields,
