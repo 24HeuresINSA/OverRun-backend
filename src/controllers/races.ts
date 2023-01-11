@@ -185,7 +185,7 @@ export const updateRace = async (req: Request, res: Response) => {
         },
       });
       if (category !== null && category.editionId === race?.editionId) {
-        data.categoryId = race.categoryId;
+        data.categoryId = category.id;
       }
     }
 
