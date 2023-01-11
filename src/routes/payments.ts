@@ -28,3 +28,30 @@ paymentRouter.post(
   authenticateJWT,
   paymentCtrl.initiatePayment
 );
+
+paymentRouter.get(
+  "/payments/:id/validate",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paymentCtrl.validatePayment
+);
+
+paymentRouter.get(
+  "/payments/:id/refuse",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paymentCtrl.refusePayment
+);
+
+paymentRouter.get(
+  "/payments/:id/refund",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paymentCtrl.refundPayment
+);
+
+paymentRouter.get(
+  "/payments/:id/setstatusbyhelloasso",
+  authenticateJWT,
+  paymentCtrl.setStatusByHelloasso
+);

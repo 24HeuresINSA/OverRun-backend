@@ -18,9 +18,53 @@ export interface HelloassoPayer {
   country: string;
 }
 
+export interface HelloassoPayment {
+  id: number;
+  items: object[];
+  cashOutState: string;
+  paymentReceiptUrl: string;
+  amount: number;
+  date: string;
+  paymentMeans: string;
+  state: string;
+  meta: {
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface HelloassoOrder {
+  payer: HelloassoPayer;
+  items: object[];
+  payments: HelloassoPayment[];
+  amount: {
+    total: number;
+    vat: number;
+    discount: number;
+  };
+  date: string;
+  fromSlug: string;
+  formType: string;
+  organizationName: string;
+  organizationSlug: string;
+  checkoutIntentId: number;
+  meta: {
+    createdAt: string;
+    updatedAt: string;
+  };
+  isAnonymous: boolean;
+  isAmountHidden: boolean;
+}
 export interface HelloassoCheckoutIntent {
   id: number;
   redirectUrl: string;
+  metadata: object;
+  order: HelloassoOrder;
+}
+
+export enum HelloassoEventType {
+  Payment = "Payment",
+  Order = "Order",
 }
 
 export const helloAssoProvider = axios.create({
@@ -70,6 +114,21 @@ export const initiateHelloassoCheckoutIntent = async (
         paymentId,
       },
     },
+    {
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
+export const getHelloassoCheckoutIntent = async (
+  checkoutIntentId: number
+): Promise<HelloassoCheckoutIntent> => {
+  const token = await getHelloassoToken();
+  const response = await helloAssoProvider.get(
+    `/v5/organizations/${process.env.HELLOASSO_ORGANISATION_SLUG}/checkout-intents/${checkoutIntentId}`,
     {
       headers: {
         Authorization: `Bearer ${token.access_token}`,
