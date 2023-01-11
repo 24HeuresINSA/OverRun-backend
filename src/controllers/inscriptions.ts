@@ -251,6 +251,7 @@ export const validateInscription = async (req: Request, res: Response) => {
     });
     res.json(inscription);
   } catch (err) {
+    console.log(err);
     res.status(500);
     res.json({
       err: "Internal error.",
