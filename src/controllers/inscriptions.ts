@@ -237,7 +237,6 @@ export const createInscription = async (req: Request, res: Response) => {
 };
 
 export const validateInscription = async (req: Request, res: Response) => {
-  console.log(validateInscription);
   const inscriptionId = parseInt(req.params.id);
   const { validated } = req.body;
   try {
@@ -252,7 +251,6 @@ export const validateInscription = async (req: Request, res: Response) => {
     });
     res.json(inscription);
   } catch (err) {
-    console.log(err);
     res.status(500);
     res.json({
       err: "Internal error.",

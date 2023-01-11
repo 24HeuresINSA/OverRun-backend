@@ -30,3 +30,8 @@ inscriptionRouter.post(
   authenticateJWT,
   inscriptionCtrl.createInscription
 );
+
+inscriptionRouter.patch(
+  "/inscriptions/:id",
+  inscriptionCtrl.validateInscription
+);
