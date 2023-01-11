@@ -93,11 +93,12 @@ model Inscription {
   certificate Certificate?
   payment     Payment?
   validated   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
 }
 
 model VA {
   id            Int         @id @default(autoincrement())
-  va            String      @db.VarChar(1000)
+  va            String      @unique @db.VarChar(1000)
   inscription   Inscription @relation(fields: [inscriptionId], references: [id])
   inscriptionId Int         @unique
 }
@@ -165,15 +166,26 @@ model Certificate {
   statusUpdatedById Int?
 }
 
+enum PaymentStatus {
+  NOT_STARTED
+  PENDING
+  VALIDATED
+  REFUSED
+  REFUND
+}
+
 model Payment {
-  id            Int         @id @default(autoincrement())
-  inscription   Inscription @relation(fields: [inscriptionId], references: [id])
-  inscriptionId Int         @unique
-  date          DateTime    @default(now())
-  value         Float
-  transaction   String      @db.VarChar(255)
-  filename      String      @db.VarChar(50)
-  status        Int
+  id                         Int           @id @default(autoincrement())
+  inscription                Inscription   @relation(fields: [inscriptionId], references: [id])
+  inscriptionId              Int           @unique
+  date                       DateTime      @default(now())
+  totalAmount                Int
+  donationAmount             Int           @default(0)
+  status                     PaymentStatus @default(PENDING)
+  helloassoCheckoutIntentId  Int?          @unique
+  helloassoCheckoutIntentUrl String?       @db.VarChar(255)
+  helloassoCheckoutExpiresAt DateTime?
+  helloassoPaymentReceiptUrl String?       @db.VarChar(255)
 }
 
 model Team {
