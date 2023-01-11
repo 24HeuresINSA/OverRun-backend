@@ -13,6 +13,7 @@ import { disciplineRouter } from "./routes/disciplines";
 import { editionRouter } from "./routes/editions";
 import { inscriptionRouter } from "./routes/inscriptions";
 import { loginRouter } from "./routes/login";
+import { paymentRouter } from "./routes/payments";
 import { raceRouter } from "./routes/races";
 import { teamRouter } from "./routes/teams";
 import { vaRouter } from "./routes/VA";
@@ -57,6 +58,7 @@ app.use(PATH, editionRouter);
 app.use(PATH, certificateRouter);
 app.use(PATH, inscriptionRouter);
 app.use(PATH, vaRouter);
+app.use(PATH, paymentRouter);
 app.use(
   `${PATH}/static`,
   authenticateJWT,
