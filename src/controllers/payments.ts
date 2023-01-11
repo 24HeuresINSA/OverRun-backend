@@ -43,6 +43,11 @@ const selectedFields = {
           vaRegistrationPrice: true,
         },
       },
+      edition: {
+        select: {
+          id: true,
+        },
+      },
     },
   },
 };
@@ -105,6 +110,9 @@ export const getMypayments = async (req: Request, res: Response) => {
 export const createPayment = async (req: Request, res: Response) => {
   const { inscriptionId } = req.body;
 
+  if (typeof inscriptionId !== "number")
+    return res.status(400).json({ err: "Inscription id is required" });
+
   const inscription = await prisma.inscription.findUnique({
     where: {
       id: inscriptionId,
@@ -144,7 +152,7 @@ export const createPayment = async (req: Request, res: Response) => {
     res.json(payment);
   } catch (err) {
     if (err instanceof PrismaClientKnownRequestError) {
-      if (err.code === "P2014") {
+      if (err.code === "P2002") {
         res.status(409);
         res.json({
           err: "The payment already exists.",
@@ -163,6 +171,9 @@ export const createPayment = async (req: Request, res: Response) => {
 export const initiatePayment = async (req: Request, res: Response) => {
   const paymentId = parseInt(req.params.id);
   const { donationAmount } = req.body;
+
+  if (!paymentId)
+    return res.status(400).json({ err: "Payment id is required" });
 
   const payment = await prisma.payment.findUnique({
     where: {
