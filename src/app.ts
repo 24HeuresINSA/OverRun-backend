@@ -11,6 +11,7 @@ import { categoryRouter } from "./routes/categories";
 import { certificateRouter } from "./routes/certificates";
 import { disciplineRouter } from "./routes/disciplines";
 import { editionRouter } from "./routes/editions";
+import { helloassoRouter } from "./routes/helloassoNotifiactions";
 import { inscriptionRouter } from "./routes/inscriptions";
 import { loginRouter } from "./routes/login";
 import { paymentRouter } from "./routes/payments";
@@ -59,6 +60,7 @@ app.use(PATH, certificateRouter);
 app.use(PATH, inscriptionRouter);
 app.use(PATH, vaRouter);
 app.use(PATH, paymentRouter);
+app.use(PATH, helloassoRouter);
 app.use(
   `${PATH}/static`,
   authenticateJWT,

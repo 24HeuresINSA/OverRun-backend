@@ -2,6 +2,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { Request, Response } from "express";
 import { prisma } from "../server";
 import {
+  getHelloassoCheckoutIntent,
   helloassoDateFormater,
   initiateHelloassoCheckoutIntent,
 } from "../utils/helloassoProvider";
@@ -14,7 +15,7 @@ export enum PaymentStatus {
   PENDING = "PENDING",
   VALIDATED = "VALIDATED",
   REFUSED = "REFUSED",
-  REFUNDED = "REFUNDED",
+  REFUND = "REFUND",
 }
 
 const selectedFields = {
@@ -244,5 +245,142 @@ export const initiatePayment = async (req: Request, res: Response) => {
     return res.json({
       err: "An error occured while initiating the payment with helloasso.",
     });
+  }
+};
+
+export const validatePayment = async (req: Request, res: Response) => {
+  const paymentId = parseInt(req.params.id);
+
+  try {
+    const payment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        status: PaymentStatus.VALIDATED,
+        helloassoPaymentReceiptUrl: req.body.data.paymentReceiptUrl,
+      },
+      select: selectedFields,
+    });
+    res.json(payment);
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const refusePayment = async (req: Request, res: Response) => {
+  const paymentId = parseInt(req.params.id);
+
+  try {
+    const payment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        status: PaymentStatus.REFUSED,
+      },
+      select: selectedFields,
+    });
+    res.json(payment);
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const refundPayment = async (req: Request, res: Response) => {
+  const paymentId = parseInt(req.params.id);
+
+  try {
+    const payment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        status: PaymentStatus.REFUND,
+      },
+      select: selectedFields,
+    });
+    res.json(payment);
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const setStatusByHelloasso = async (req: Request, res: Response) => {
+  const paymentId = parseInt(req.params.id);
+
+  const payment = await prisma.payment.findUnique({
+    where: {
+      id: paymentId,
+    },
+    select: selectedFields,
+  });
+
+  if (!payment?.helloassoCheckoutIntentId)
+    return res
+      .status(404)
+      .json({ err: "Payment or helloasso intent not found" });
+
+  const helloassoResponse = await getHelloassoCheckoutIntent(
+    payment.helloassoCheckoutIntentId
+  );
+
+  if (!helloassoResponse?.order?.payments) {
+    const payment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        status: PaymentStatus.REFUSED,
+      },
+      select: selectedFields,
+    });
+    return res.json(payment);
+  }
+
+  if (
+    helloassoResponse.order.payments.some(
+      (payment) => payment.state === "Authorized"
+    )
+  ) {
+    const payment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        status: PaymentStatus.VALIDATED,
+      },
+      select: selectedFields,
+    });
+    return res.json(payment);
+  }
+
+  if (
+    helloassoResponse.order.payments.some(
+      (payment) => payment.state === "Refunding"
+    )
+  ) {
+    const payment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        status: PaymentStatus.REFUND,
+      },
+      select: selectedFields,
+    });
+    return res.json(payment);
   }
 };
