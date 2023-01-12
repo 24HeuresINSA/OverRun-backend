@@ -179,8 +179,9 @@ model Payment {
   inscription                Inscription   @relation(fields: [inscriptionId], references: [id])
   inscriptionId              Int           @unique
   date                       DateTime      @default(now())
-  totalAmount                Int
+  raceAmount                 Int
   donationAmount             Int           @default(0)
+  totalAmount                Int
   status                     PaymentStatus @default(PENDING)
   helloassoCheckoutIntentId  Int?          @unique
   helloassoCheckoutIntentUrl String?       @db.VarChar(255)

@@ -7,6 +7,7 @@
   - The `status` column on the `Payment` table would be dropped and recreated. This will lead to data loss if there is data in the column.
   - A unique constraint covering the columns `[helloassoCheckoutIntentId]` on the table `Payment` will be added. If there are existing duplicate values, this will fail.
   - A unique constraint covering the columns `[va]` on the table `VA` will be added. If there are existing duplicate values, this will fail.
+  - Added the required column `raceAmount` to the `Payment` table without a default value. This is not possible if the table is not empty.
   - Added the required column `totalAmount` to the `Payment` table without a default value. This is not possible if the table is not empty.
 
 */
@@ -25,6 +26,7 @@ ADD COLUMN     "helloassoCheckoutExpiresAt" TIMESTAMP(3),
 ADD COLUMN     "helloassoCheckoutIntentId" INTEGER,
 ADD COLUMN     "helloassoCheckoutIntentUrl" VARCHAR(255),
 ADD COLUMN     "helloassoPaymentReceiptUrl" VARCHAR(255),
+ADD COLUMN     "raceAmount" INTEGER NOT NULL,
 ADD COLUMN     "totalAmount" INTEGER NOT NULL,
 DROP COLUMN "status",
 ADD COLUMN     "status" "PaymentStatus" NOT NULL DEFAULT E'PENDING';

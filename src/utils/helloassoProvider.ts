@@ -93,6 +93,7 @@ export const initiateHelloassoCheckoutIntent = async (
   paymentId: number,
   inscriptionId: number,
   totalAmount: number,
+  raceAmount: number,
   donationAmount: number,
   isDonation: boolean,
   payer: HelloassoPayer,
@@ -106,7 +107,7 @@ export const initiateHelloassoCheckoutIntent = async (
       initialAmount: totalAmount,
       itemName:
         "Paiement pour la participation aux couses des 24 heures de l'INSA (OverRun)",
-      backUrl: `${process.env.FRONTEND_URL}/register/payment/?donationAmount=${donationAmount}&token=${userJWT}`,
+      backUrl: `${process.env.FRONTEND_URL}/register/payment/?donationAmount=${donationAmount}&raceAmount=${raceAmount}&token=${userJWT}`,
       errorUrl: `${process.env.FRONTEND_URL}/payment/helloassoreturn/?type=error&totalAmount=${totalAmount}&donationAmount=${donationAmount}&paymentId=${paymentId}&token=${userJWT}`,
       returnUrl: `${process.env.FRONTEND_URL}/payment/helloassoreturn/?type=return&totalAmount=${totalAmount}&donationAmount=${donationAmount}&paymentId=${paymentId}&token=${userJWT}`,
       containsDonation: isDonation,

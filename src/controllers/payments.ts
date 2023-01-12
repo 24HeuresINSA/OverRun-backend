@@ -21,6 +21,7 @@ export enum PaymentStatus {
 const selectedFields = {
   id: true,
   status: true,
+  raceAmount: true,
   totalAmount: true,
   donationAmount: true,
   helloassoCheckoutIntentId: true,
@@ -145,6 +146,7 @@ export const createPayment = async (req: Request, res: Response) => {
       data: {
         inscriptionId: inscription.id,
         status: PaymentStatus.NOT_STARTED,
+        raceAmount: racePrice,
         totalAmount: racePrice,
       },
       select: selectedFields,
@@ -183,6 +185,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
       id: true,
       status: true,
       totalAmount: true,
+      raceAmount: true,
       donationAmount: true,
       inscription: {
         select: {
@@ -209,16 +212,16 @@ export const initiatePayment = async (req: Request, res: Response) => {
   if (payment.status !== PaymentStatus.NOT_STARTED)
     return res.status(409).json({ err: "Payment already initiated" });
 
-  const donationAmountNumber = parseInt(donationAmount);
-  const computedTotalAmount = payment.totalAmount + donationAmountNumber;
+  const computedTotalAmount = payment.totalAmount + parseInt(donationAmount);
 
   try {
     const helloassoCheckoutIntent = await initiateHelloassoCheckoutIntent(
       payment.id,
       payment.inscription.id,
       computedTotalAmount,
+      payment.raceAmount,
       donationAmount,
-      donationAmount ? true : false,
+      donationAmount > 0 ? true : false,
       {
         firstName: payment.inscription.athlete.firstName,
         lastName: payment.inscription.athlete.lastName,
