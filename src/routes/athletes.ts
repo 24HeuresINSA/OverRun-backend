@@ -1,10 +1,12 @@
 import express from "express";
+import { body } from "express-validator";
 import * as athleteCtrl from "../controllers/athletes";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
 import { filter } from "../middlewares/filter";
 import { paginate } from "../middlewares/pagination";
 import { search } from "../middlewares/search";
+import { normalizeEmailOptions } from "../utils/normalizeEmailOptions";
 
 export const athleteRouter = express.Router();
 
@@ -87,7 +89,11 @@ athleteRouter.get("/athletes/me", authenticateJWT, athleteCtrl.getAthleteMe);
 
 athleteRouter.get("/athletes/:id", authenticateJWT, athleteCtrl.getAthleteById);
 
-athleteRouter.post("/athletes", athleteCtrl.createAthlete);
+athleteRouter.post(
+  "/athletes",
+  body("email").isEmail().normalizeEmail(normalizeEmailOptions),
+  athleteCtrl.createAthlete
+);
 
 athleteRouter.put("/athletes/:id", authenticateJWT, athleteCtrl.updateAthlete);
 
