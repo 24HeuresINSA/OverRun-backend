@@ -1,13 +1,14 @@
 import express from "express";
-import * as loginCtrl from "../controllers/login";
 import { body, oneOf } from "express-validator";
+import * as loginCtrl from "../controllers/login";
+import { normalizeEmailOptions } from "../utils/normalizeEmailOptions";
 
 export const loginRouter = express.Router();
 
 loginRouter.post(
   "/login",
   oneOf([
-    body("email").isEmail().normalizeEmail(),
+    body("email").isEmail().normalizeEmail(normalizeEmailOptions),
     body("username").notEmpty(),
   ]),
   loginCtrl.login
