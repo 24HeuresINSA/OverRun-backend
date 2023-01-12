@@ -248,7 +248,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
         helloassoCheckoutIntentId: helloassoCheckoutIntent.id,
         helloassoCheckoutIntentUrl: helloassoCheckoutIntent.redirectUrl,
         helloassoCheckoutExpiresAt: new Date(
-          new Date().getDate() + 15 * ONE_MINUTE_IN_MILLISECONDS
+          new Date().getTime() + 15 * ONE_MINUTE_IN_MILLISECONDS
         ),
       },
       select: selectedFields,
@@ -257,6 +257,125 @@ export const initiatePayment = async (req: Request, res: Response) => {
     res.json(updatedPayment);
   } catch (err) {
     console.log(err);
+    res.status(500);
+    return res.json({
+      err: "An error occured while initiating the payment with helloasso.",
+    });
+  }
+};
+
+export const updatePayment = async (req: Request, res: Response) => {
+  const paymentId = parseInt(req.params.id);
+  const { donationAmount } = req.body;
+  const now = new Date().getTime();
+
+  if (!paymentId)
+    return res.status(400).json({ err: "Payment id is required" });
+
+  const payment = await prisma.payment.findUnique({
+    where: {
+      id: paymentId,
+    },
+    select: {
+      id: true,
+      status: true,
+      helloassoCheckoutExpiresAt: true,
+      totalAmount: true,
+      raceAmount: true,
+      donationAmount: true,
+      inscription: {
+        select: {
+          id: true,
+          athlete: {
+            select: {
+              user: true,
+              firstName: true,
+              lastName: true,
+              dateOfBirth: true,
+              address: true,
+              city: true,
+              zipCode: true,
+              country: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!payment) return res.status(404).json({ err: "Payment not found" });
+
+  if (
+    payment.status === PaymentStatus.NOT_STARTED ||
+    !payment.helloassoCheckoutExpiresAt
+  )
+    return res.status(409).json({ err: "Payment aren't initiated" });
+
+  if (payment.status === PaymentStatus.VALIDATED)
+    return res.status(409).json({ err: "Payment already validated" });
+
+  if (
+    payment.status === PaymentStatus.PENDING &&
+    now < payment.helloassoCheckoutExpiresAt.getTime() &&
+    payment.donationAmount === donationAmount
+  )
+    return res.status(409).json({ err: "Payment already initiated" });
+
+  const computedTotalAmount =
+    payment.raceAmount +
+    parseInt(
+      donationAmount || donationAmount === 0
+        ? donationAmount
+        : payment.donationAmount
+    );
+
+  console.log("donationAmount", donationAmount);
+  console.log("computedTotalAmount", computedTotalAmount);
+
+  try {
+    const helloassoCheckoutIntent = await initiateHelloassoCheckoutIntent(
+      payment.id,
+      payment.inscription.id,
+      computedTotalAmount,
+      payment.raceAmount,
+      donationAmount,
+      donationAmount > 0 ? true : false,
+      {
+        firstName: payment.inscription.athlete.firstName,
+        lastName: payment.inscription.athlete.lastName,
+        email: payment.inscription.athlete.user.email,
+        dateOfBirth: helloassoDateFormater(
+          payment.inscription.athlete.dateOfBirth
+        ),
+        address: payment.inscription.athlete.address,
+        city: payment.inscription.athlete.city,
+        zipCode: payment.inscription.athlete.zipCode,
+        country: "FRA",
+      },
+      req.headers.authorization?.slice(7) as string
+    );
+
+    const updatedPayment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        totalAmount: computedTotalAmount,
+        donationAmount,
+        status: PaymentStatus.PENDING,
+        helloassoCheckoutIntentId: helloassoCheckoutIntent.id,
+        helloassoCheckoutIntentUrl: helloassoCheckoutIntent.redirectUrl,
+        helloassoCheckoutExpiresAt: new Date(
+          new Date().getTime() + 15 * ONE_MINUTE_IN_MILLISECONDS
+        ),
+      },
+      select: selectedFields,
+    });
+
+    res.json(updatedPayment);
+  } catch (err: any) {
+    console.log(err);
+    if (err.isAxiosError) console.log(err.response?.data);
     res.status(500);
     return res.json({
       err: "An error occured while initiating the payment with helloasso.",
