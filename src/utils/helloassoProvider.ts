@@ -93,8 +93,10 @@ export const initiateHelloassoCheckoutIntent = async (
   paymentId: number,
   inscriptionId: number,
   totalAmount: number,
+  donationAmount: number,
   isDonation: boolean,
-  payer: HelloassoPayer
+  payer: HelloassoPayer,
+  userJWT: string
 ): Promise<HelloassoCheckoutIntent> => {
   const token = await getHelloassoToken();
   const response = await helloAssoProvider.post(
@@ -104,14 +106,15 @@ export const initiateHelloassoCheckoutIntent = async (
       initialAmount: totalAmount,
       itemName:
         "Paiement pour la participation aux couses des 24 heures de l'INSA (OverRun)",
-      backUrl: `${process.env.FRONTEND_URL}/`,
-      errorUrl: `${process.env.FRONTEND_URL}/`,
-      returnUrl: `${process.env.FRONTEND_URL}/`,
+      backUrl: `${process.env.FRONTEND_URL}/register/payment/?donationAmount=${donationAmount}&token=${userJWT}`,
+      errorUrl: `${process.env.FRONTEND_URL}/payment/helloassoreturn/?type=error&totalAmount=${totalAmount}&donationAmount=${donationAmount}&paymentId=${paymentId}&token=${userJWT}`,
+      returnUrl: `${process.env.FRONTEND_URL}/payment/helloassoreturn/?type=return&totalAmount=${totalAmount}&donationAmount=${donationAmount}&paymentId=${paymentId}&token=${userJWT}`,
       containsDonation: isDonation,
       payer,
       metadata: {
         inscriptionId,
         paymentId,
+        donationAmount,
       },
     },
     {

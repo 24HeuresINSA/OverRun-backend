@@ -217,6 +217,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
       payment.id,
       payment.inscription.id,
       computedTotalAmount,
+      donationAmount,
       donationAmount ? true : false,
       {
         firstName: payment.inscription.athlete.firstName,
@@ -229,7 +230,8 @@ export const initiatePayment = async (req: Request, res: Response) => {
         city: payment.inscription.athlete.city,
         zipCode: payment.inscription.athlete.zipCode,
         country: "FRA",
-      }
+      },
+      req.headers.authorization?.slice(7) as string
     );
 
     const updatedPayment = await prisma.payment.update({

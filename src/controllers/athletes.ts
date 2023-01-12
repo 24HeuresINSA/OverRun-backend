@@ -73,6 +73,13 @@ const selectedFieldsForMe = {
           name: true,
         },
       },
+      payment: {
+        select: {
+          id: true,
+          status: true,
+          helloassoCheckoutIntentUrl: true,
+        },
+      },
     },
   },
 };
