@@ -4,7 +4,7 @@ import { prisma } from "../server";
 import {
   getHelloassoCheckoutIntent,
   helloassoDateFormater,
-  initiateHelloassoCheckoutIntent,
+  initiateHelloassoCheckoutIntent
 } from "../utils/helloassoProvider";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 
@@ -34,6 +34,8 @@ const selectedFields = {
       athlete: {
         select: {
           id: true,
+          firstName: true,
+          lastName: true,
         },
       },
       race: {
@@ -136,7 +138,7 @@ export const createPayment = async (req: Request, res: Response) => {
 
   if (!inscription)
     return res.status(404).json({ err: "Inscription not found" });
-
+  console.log("test");
   const racePrice = inscription?.va
     ? inscription.race.vaRegistrationPrice
     : inscription.race.registrationPrice;
