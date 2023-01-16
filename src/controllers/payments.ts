@@ -4,7 +4,7 @@ import { prisma } from "../server";
 import {
   getHelloassoCheckoutIntent,
   helloassoDateFormater,
-  initiateHelloassoCheckoutIntent
+  initiateHelloassoCheckoutIntent,
 } from "../utils/helloassoProvider";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 
