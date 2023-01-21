@@ -59,6 +59,7 @@ export const getPayments = async (req: Request, res: Response) => {
   try {
     const payments = await prisma.payment.findMany({
       select: selectedFields,
+      orderBy: req.orderBy,
     });
     res.json(jsonPaginateResponse(payments, req));
   } catch (err) {

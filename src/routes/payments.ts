@@ -3,6 +3,7 @@ import * as paymentCtrl from "../controllers/payments";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
 import { paginate } from "../middlewares/pagination";
+import { orderBy } from "../middlewares/orderBy";
 
 export const paymentRouter = express.Router();
 
@@ -11,6 +12,7 @@ paymentRouter.get(
   authenticateJWT,
   accessControl(["ADMIN"]),
   paginate(),
+  orderBy([]),
   paymentCtrl.getPayments
 );
 

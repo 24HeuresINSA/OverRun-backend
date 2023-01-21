@@ -1,8 +1,8 @@
 import { Response, Request, NextFunction } from "express";
 
-export const orderBy = async (allowedFields: Array<string>) => {
+export const orderBy = (allowedFields: Array<string>) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    console.log(orderBy);
+    req.orderBy = {};
     const requestedField = String(req.query.orderColumn);
     let key = "id";
     let value = "desc";
@@ -17,7 +17,6 @@ export const orderBy = async (allowedFields: Array<string>) => {
       value = requestedOrder;
     }
     req.orderBy[key] = value;
-
     next();
   };
 };
