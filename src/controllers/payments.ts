@@ -216,6 +216,23 @@ export const initiatePayment = async (req: Request, res: Response) => {
 
   const computedTotalAmount = payment.totalAmount + parseInt(donationAmount);
 
+  if (computedTotalAmount === 0) {
+    const updatedPayment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        totalAmount: computedTotalAmount,
+        donationAmount,
+        status: PaymentStatus.VALIDATED,
+      },
+      select: selectedFields,
+    });
+
+    res.json(updatedPayment);
+    return;
+  }
+
   try {
     const helloassoCheckoutIntent = await initiateHelloassoCheckoutIntent(
       payment.id,
@@ -377,7 +394,6 @@ export const updatePayment = async (req: Request, res: Response) => {
     res.json(updatedPayment);
   } catch (err: any) {
     console.log(err);
-    if (err.isAxiosError) console.log(err.response?.data);
     res.status(500);
     return res.json({
       err: "An error occured while initiating the payment with helloasso.",

@@ -71,6 +71,17 @@ export const helloAssoProvider = axios.create({
   baseURL: process.env.HELLOASSO_BASE_URL,
 });
 
+helloAssoProvider.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.log(error);
+    console.log(error.response.data);
+    return error.response;
+  }
+);
+
 export const helloassoDateFormater = (date: Date): string => {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 };
