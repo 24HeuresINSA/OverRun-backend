@@ -13,7 +13,7 @@ raceRouter.get(
   filter([
     [["editionId", "id"], "number", true, ["edition", "is"]],
     [["categoryId", "id"], "number", true, ["category"]],
-    ["maxTeamMembers", "number", true, ["category"]],
+    ["minTeamMembers", "number", true, ["category"]],
   ]),
   search([["name", "string", false]]),
   paginate(),
