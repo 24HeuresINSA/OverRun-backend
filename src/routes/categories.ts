@@ -27,6 +27,7 @@ categoryRouter.get(
   filter([
     ["id", "number", false],
     [["editionId", "id"], "number", true, ["edition", "is"]],
+    [["maxTeamMembers", "gt"], "number", true, ["maxTeamMembers"]],
   ]),
   search([["name", "string", false]]),
   paginate(),
