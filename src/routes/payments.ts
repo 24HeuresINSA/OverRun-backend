@@ -2,6 +2,7 @@ import express from "express";
 import * as paymentCtrl from "../controllers/payments";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
+import { filter } from "../middlewares/filter";
 import { paginate } from "../middlewares/pagination";
 import { orderBy } from "../middlewares/orderBy";
 
@@ -11,6 +12,9 @@ paymentRouter.get(
   "/payments",
   authenticateJWT,
   accessControl(["ADMIN"]),
+  filter([
+    [["editionId", "id"], "number", true, ["inscription", "edition", "is"]],
+  ]),
   paginate(),
   orderBy([]),
   paymentCtrl.getPayments

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { Request, Response } from "express";
 import { prisma } from "../server";
@@ -55,11 +56,52 @@ const selectedFields = {
   },
 };
 
+function searchingFields(searchString: string): Prisma.PaymentWhereInput {
+  if (!searchString || searchString === "") return {};
+  return {
+    OR: [
+      {
+        inscription: {
+          athlete: {
+            firstName: {
+              contains: searchString,
+              mode: "insensitive",
+            },
+          },
+        },
+      },
+      {
+        inscription: {
+          athlete: {
+            lastName: {
+              contains: searchString,
+              mode: "insensitive",
+            },
+          },
+        },
+      },
+      {
+        inscription: {
+          race: {
+            name: {
+              contains: searchString,
+              mode: "insensitive",
+            },
+          },
+        },
+      },
+    ],
+  };
+}
+
 export const getPayments = async (req: Request, res: Response) => {
+  const searchString = req.query.search as string;
+  console.log({ ...searchingFields(searchString), ...req.filter });
   try {
     const payments = await prisma.payment.findMany({
       select: selectedFields,
       orderBy: req.orderBy,
+      where: { ...searchingFields(searchString), ...req.filter },
     });
     res.json(jsonPaginateResponse(payments, req));
   } catch (err) {
