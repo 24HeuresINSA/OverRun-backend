@@ -96,7 +96,6 @@ function searchingFields(searchString: string): Prisma.PaymentWhereInput {
 
 export const getPayments = async (req: Request, res: Response) => {
   const searchString = req.query.search as string;
-  console.log({ ...searchingFields(searchString), ...req.filter });
   try {
     const payments = await prisma.payment.findMany({
       select: selectedFields,

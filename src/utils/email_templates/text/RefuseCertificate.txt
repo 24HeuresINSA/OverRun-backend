@@ -1,0 +1,9 @@
+Bonjour {{ firstName }},
+
+L'équipe des courses des 24 heures de l'INSA a le regret de vous informer que votre certificat médical a été refusé.
+Les raisons de ce refus sont les suivantes :
+
+{{ reason }}
+
+Vous pouvez dès à présent vous connecter sur OverRun pour changer votre certificat médical : 
+{{ url }}/login

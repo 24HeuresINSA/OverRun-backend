@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import fileUpload from "express-fileupload";
 import fs from "fs";
 import { prisma } from "../server";
+import { sendEmail } from "../utils/emails";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 
 const selectedFields = {
@@ -193,7 +194,7 @@ export const getCertificateData = async (req: Request, res: Response) => {
 
 export const updateCertificateStatus = async (req: Request, res: Response) => {
   const certificateId = parseInt(req.params.id);
-  const { status, statusUpdatedById } = req.body;
+  const { status, statusUpdatedById, reason } = req.body;
 
   try {
     const certificate = await prisma.certificate.update({
@@ -205,7 +206,22 @@ export const updateCertificateStatus = async (req: Request, res: Response) => {
         statusUpdatedById: +statusUpdatedById,
         statusUpdatedAt: new Date(),
       },
+      select: selectedFields,
     });
+
+    if (status === 5) {
+      // refused
+      sendEmail(
+        certificate.inscription.athlete.user.email,
+        "Refus de votre certificat",
+        "RefuseCertificate",
+        {
+          firstName: certificate.inscription.athlete.firstName,
+          url: process.env.FRONTEND_URL,
+          reason: reason,
+        }
+      );
+    }
     res.json(certificate);
   } catch (err) {
     console.log(err);
