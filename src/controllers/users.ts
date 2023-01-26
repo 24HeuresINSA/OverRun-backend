@@ -60,7 +60,7 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
   }
 };
 export const updatePasswordUser = async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.id);
+  const userId = req.user.id;
   const { password } = req.body;
   bcrypt.hash(password, saltRounds, async (err, hash) => {
     if (err) {
