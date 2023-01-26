@@ -1,5 +1,6 @@
 import express from "express";
 import * as userCtrl from "../controllers/users";
+import { authenticateJWT } from "../middlewares/authentication";
 
 export const usersRouter = express.Router();
 
@@ -89,3 +90,9 @@ export const usersRouter = express.Router();
  *                       example: Leanne Graham
  */
 // usersRouter.get('/users/:id', userCtrl.getUserById);
+
+usersRouter.patch(
+  "/users/:id/updatePassword",
+  authenticateJWT,
+  userCtrl.updatePasswordUser
+);

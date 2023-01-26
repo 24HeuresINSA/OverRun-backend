@@ -17,6 +17,7 @@ import { loginRouter } from "./routes/login";
 import { paymentRouter } from "./routes/payments";
 import { raceRouter } from "./routes/races";
 import { teamRouter } from "./routes/teams";
+import { usersRouter } from "./routes/users";
 import { vaRouter } from "./routes/VA";
 import { swaggerSpec } from "./utils/swaggerConfig";
 
@@ -61,6 +62,7 @@ app.use(PATH, inscriptionRouter);
 app.use(PATH, vaRouter);
 app.use(PATH, paymentRouter);
 app.use(PATH, helloassoRouter);
+app.use(PATH, usersRouter);
 app.use(
   `${PATH}/static`,
   authenticateJWT,

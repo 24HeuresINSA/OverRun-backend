@@ -59,8 +59,44 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
     });
   }
 };
+export const updatePasswordUser = async (req: Request, res: Response) => {
+  const userId = parseInt(req.params.id);
+  const { password } = req.body;
+  bcrypt.hash(password, saltRounds, async (err, hash) => {
+    if (err) {
+      res.status(500);
+      res.json({
+        err: "Internal error.",
+      });
+      return;
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      res.status(400);
+      res.json({
+        err: "User does not exist.",
+      });
+      return;
+    }
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hash,
+      },
+    });
+    res.json({
+      success: "Password successfully updated.",
+    });
+  });
+};
 
-export const updatePassword = async (req: Request, res: Response) => {
+export const updatePasswordInvite = async (req: Request, res: Response) => {
   const inviteId = parseInt(req.params.id);
   const { token, password } = req.body;
   try {
