@@ -92,7 +92,7 @@ export const usersRouter = express.Router();
 // usersRouter.get('/users/:id', userCtrl.getUserById);
 
 usersRouter.patch(
-  "/users/:id/updatePassword",
+  "/users/me/updatepassword",
   authenticateJWT,
   userCtrl.updatePasswordUser
 );
