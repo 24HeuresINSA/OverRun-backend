@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { emailTimeout, prisma, saltRounds } from "../server";
 import { sendEmail } from "../utils/emails";
-import { secureRandomToken } from "../utils/secureRandomToken";
+// import { secureRandomToken } from "../utils/secureRandomToken";
 
 // export const getUsers = async (req: Request, res: Response) => {
 
@@ -11,18 +11,31 @@ import { secureRandomToken } from "../utils/secureRandomToken";
 export const createPasswordInvite = async (req: Request, res: Response) => {
   const { email } = req.body;
   try {
-    const userExists = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         email: email,
       },
     });
-    if (userExists) {
-      await prisma.passwordInvite.delete({
+    if (user) {
+      const previousInvite = await prisma.passwordInvite.findUnique({
         where: {
-          userId: userExists.id,
+          userId: user.id,
         },
       });
-      const token = String(secureRandomToken(50));
+      if (previousInvite) {
+        await prisma.passwordInvite.delete({
+          where: {
+            userId: user.id,
+          },
+        });
+      }
+      const rand = function () {
+        return Math.random().toString(36).substr(2);
+      };
+      const generateToken = function () {
+        return rand() + rand(); // to make it longer
+      };
+      const token = generateToken();
       const currentDate = new Date();
       bcrypt.hash(token, saltRounds, async (err, hash) => {
         if (err) {
@@ -33,17 +46,23 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
         }
         await prisma.passwordInvite.create({
           data: {
-            userId: userExists.id,
+            userId: user.id,
             token: hash,
             expirateAt: currentDate.getTime() + emailTimeout * 1000,
           },
         });
       });
-      sendEmail(email, "Invitation à rejoindre OverRun", "AdminInvite", {
+      sendEmail(email, "Réinitialisation de mot de passe", "ResetPassword", {
         token: token,
+        pseudo: user.username,
+        expirateAt: new Date(
+          currentDate.getTime() + emailTimeout * 1000
+        ).toLocaleDateString("FR-fr", { hour: "2-digit", minute: "2-digit" }),
+        url: process.env.FRONTEND_URL + "/reset" + "?token=",
+        id: user.id,
       });
       res.json({
-        success: "Reset password email send at " + email + ".",
+        success: "Reset password email sent at " + email + ".",
       });
     } else {
       res.status(400);
@@ -59,6 +78,7 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const updatePasswordUser = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { password } = req.body;
@@ -97,15 +117,30 @@ export const updatePasswordUser = async (req: Request, res: Response) => {
 };
 
 export const updatePasswordInvite = async (req: Request, res: Response) => {
-  const inviteId = parseInt(req.params.id);
+  const userId = parseInt(req.params.id);
   const { token, password } = req.body;
   try {
     const invite = await prisma.passwordInvite.findUnique({
       where: {
-        id: inviteId,
+        userId: userId,
       },
     });
 
+    const now = new Date();
+    if (!invite?.expirateAt) {
+      res.status(400);
+      res.json({
+        err: "Invalid token.",
+      });
+      return;
+    }
+    if (invite?.expirateAt && invite?.expirateAt < now.getTime()) {
+      res.status(401);
+      res.json({
+        err: "Expired token.",
+      });
+      return;
+    }
     const valideToken = await bcrypt.compare(token, String(invite?.token));
     if (valideToken) {
       bcrypt.hash(password, saltRounds, async (err, hash) => {
@@ -123,13 +158,18 @@ export const updatePasswordInvite = async (req: Request, res: Response) => {
               password: hash,
             },
           });
+          await prisma.passwordInvite.delete({
+            where: {
+              id: invite.id,
+            },
+          });
           res.json({
             success: "Password successfully updated.",
           });
         }
       });
     } else {
-      res.json(400);
+      res.status(400);
       res.json({
         err: "Invalid token.",
       });
