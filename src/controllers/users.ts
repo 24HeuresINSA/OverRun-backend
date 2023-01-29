@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { time } from "console";
 import { Request, Response } from "express";
 import { emailTimeout, prisma, saltRounds } from "../server";
 import { sendEmail } from "../utils/emails";
@@ -35,8 +36,11 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
         return rand() + rand(); // to make it longer
       };
       const token = generateToken();
-      const currentDate = new Date();
-      const expirateAt = currentDate.getTime() + emailTimeout * 1000;
+      //const currentDate = new Date();
+      //const expirateAt = currentDate.getTime() + emailTimeout * 1000;
+      const expirateAt = new Date();
+      expirateAt.setSeconds(expirateAt.getSeconds() + emailTimeout);
+
       bcrypt.hash(token, saltRounds, async (err, hash) => {
         if (err) {
           res.status(500);
@@ -48,16 +52,18 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
           data: {
             userId: user.id,
             token: hash,
-            expirateAt,
+            expirateAt: expirateAt.getTime(),
           },
         });
       });
       sendEmail(email, "Réinitialisation de mot de passe", "ResetPassword", {
         token,
         pseudo: user.username,
-        expirateAt: new Date(
-          expireteAt
-        ).toLocaleDateString("FR-fr", { hour: "2-digit", minute: "2-digit" }),
+        expirateAt: expirateAt.toLocaleDateString("fr-FR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Europe/Paris",
+        }),
         url: process.env.FRONTEND_URL + "/reset" + "?token=",
         id: user.id,
       });
