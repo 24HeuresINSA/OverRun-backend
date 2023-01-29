@@ -36,8 +36,6 @@ export const createPasswordInvite = async (req: Request, res: Response) => {
         return rand() + rand(); // to make it longer
       };
       const token = generateToken();
-      //const currentDate = new Date();
-      //const expirateAt = currentDate.getTime() + emailTimeout * 1000;
       const expirateAt = new Date();
       expirateAt.setSeconds(expirateAt.getSeconds() + emailTimeout);
 
