@@ -96,3 +96,7 @@ usersRouter.patch(
   authenticateJWT,
   userCtrl.updatePasswordUser
 );
+
+usersRouter.post("/users/resetpassword", userCtrl.createPasswordInvite);
+
+usersRouter.patch("/users/:id/resetpassword", userCtrl.updatePasswordInvite);
