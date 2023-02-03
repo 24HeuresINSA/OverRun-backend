@@ -4,6 +4,7 @@ import fs from "fs";
 import { prisma } from "../server";
 import { sendEmail } from "../utils/emails";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
+import { InscriptionStatus } from "./inscriptions";
 
 const selectedFields = {
   id: true,
@@ -76,6 +77,10 @@ export const uploadCertificate = async (req: Request, res: Response) => {
             },
           },
           editionId: parseInt(editionId),
+          OR: [
+            { status: InscriptionStatus.PENDING },
+            { status: InscriptionStatus.VALIDATED },
+          ],
         },
       });
       // const inscriptions = await prisma.inscription.findMany();

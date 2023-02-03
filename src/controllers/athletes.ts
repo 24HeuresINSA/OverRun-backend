@@ -54,7 +54,7 @@ const selectedFieldsForMe = {
         },
       },
       id: true,
-      validated: true,
+      status: true,
       va: {
         select: {
           id: true,
