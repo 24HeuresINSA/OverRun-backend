@@ -17,6 +17,7 @@ export enum PaymentStatus {
   VALIDATED = "VALIDATED",
   REFUSED = "REFUSED",
   REFUND = "REFUND",
+  REFUNDING = "REFUNDING",
 }
 
 const selectedFields = {
@@ -388,9 +389,6 @@ export const updatePayment = async (req: Request, res: Response) => {
         ? donationAmount
         : payment.donationAmount
     );
-
-  console.log("donationAmount", donationAmount);
-  console.log("computedTotalAmount", computedTotalAmount);
 
   try {
     const helloassoCheckoutIntent = await initiateHelloassoCheckoutIntent(

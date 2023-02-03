@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { prisma, saltRounds } from "../server";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
+import { InscriptionStatus } from "./inscriptions";
 
 const selectedFields = {
   id: true,
@@ -143,6 +144,10 @@ export const createTeam = async (req: Request, res: Response) => {
                   },
                 },
                 editionId: edition.id,
+                OR: [
+                  { status: InscriptionStatus.PENDING },
+                  { status: InscriptionStatus.VALIDATED },
+                ],
               },
             });
             const teams = await prisma.team.findMany({
@@ -296,6 +301,10 @@ export const joinTeam = async (req: Request, res: Response) => {
     const teamMembers = await prisma.inscription.findMany({
       where: {
         teamId: team?.id,
+        OR: [
+          { status: InscriptionStatus.PENDING },
+          { status: InscriptionStatus.VALIDATED },
+        ],
       },
     });
     if (athlete !== null && team !== null) {
@@ -308,6 +317,10 @@ export const joinTeam = async (req: Request, res: Response) => {
             where: {
               athleteId: athlete.id,
               editionId: team.editionId,
+              OR: [
+                { status: InscriptionStatus.PENDING },
+                { status: InscriptionStatus.VALIDATED },
+              ],
             },
           });
           bcrypt.compare(
@@ -414,6 +427,10 @@ export const leaveTeam = async (req: Request, res: Response) => {
         where: {
           athleteId: athlete.id,
           teamId: teamId,
+          OR: [
+            { status: InscriptionStatus.PENDING },
+            { status: InscriptionStatus.VALIDATED },
+          ],
         },
         include: {
           teamAdmin: true,
@@ -513,6 +530,10 @@ export const addTeamAdmin = async (req: Request, res: Response) => {
             },
           },
           teamId: team?.id,
+          OR: [
+            { status: InscriptionStatus.PENDING },
+            { status: InscriptionStatus.VALIDATED },
+          ],
         },
         include: {
           teamAdmin: {
@@ -531,6 +552,10 @@ export const addTeamAdmin = async (req: Request, res: Response) => {
           where: {
             athleteId: athleteId,
             teamId: teamId,
+            OR: [
+              { status: InscriptionStatus.PENDING },
+              { status: InscriptionStatus.VALIDATED },
+            ],
           },
           include: {
             teamAdmin: true,
@@ -718,6 +743,10 @@ export const removeTeamMember = async (req: Request, res: Response) => {
           where: {
             athleteId: athleteId,
             teamId: team.id,
+            OR: [
+              { status: InscriptionStatus.PENDING },
+              { status: InscriptionStatus.VALIDATED },
+            ],
           },
         });
         if (member !== null) {
