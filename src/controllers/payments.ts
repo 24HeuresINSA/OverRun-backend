@@ -569,6 +569,23 @@ export const setStatusByHelloasso = async (req: Request, res: Response) => {
         id: paymentId,
       },
       data: {
+        status: PaymentStatus.REFUNDING,
+      },
+      select: selectedFields,
+    });
+    return res.json(payment);
+  }
+
+  if (
+    helloassoResponse.order.payments.some(
+      (payment) => payment.state === "Refunded"
+    )
+  ) {
+    const payment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
         status: PaymentStatus.REFUND,
       },
       select: selectedFields,
