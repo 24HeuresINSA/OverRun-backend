@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import { time } from "console";
 import { Request, Response } from "express";
 import { emailTimeout, prisma, saltRounds } from "../server";
 import { sendEmail } from "../utils/emails";
