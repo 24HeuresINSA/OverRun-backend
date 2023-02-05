@@ -300,3 +300,25 @@ export const validateInscription = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const cancelInscription = async (req: Request, res: Response) => {
+  const inscriptionId = parseInt(req.params.id);
+  try {
+    const inscription = await prisma.inscription.update({
+      where: {
+        id: inscriptionId,
+      },
+      data: {
+        status: InscriptionStatus.CANCELLED,
+      },
+      select: selectedFields,
+    });
+    res.json(inscription);
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};

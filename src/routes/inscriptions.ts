@@ -32,6 +32,16 @@ inscriptionRouter.post(
 );
 
 inscriptionRouter.patch(
+  // TODO: change to /inscriptions/:id/validate with post method for REST compliance
   "/inscriptions/:id",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
   inscriptionCtrl.validateInscription
+);
+
+inscriptionRouter.post(
+  "/inscriptions/:id/cancelation",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  inscriptionCtrl.cancelInscription
 );
