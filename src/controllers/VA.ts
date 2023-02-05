@@ -45,7 +45,6 @@ export const getVAs = async (req: Request, res: Response) => {
 };
 
 export const findPreviousVA = async (req: Request, res: Response) => {
-  const editionId = parseInt(req.params.editionId);
   try {
     const previousInscription = await prisma.vA.findFirst({
       where: {
@@ -56,19 +55,21 @@ export const findPreviousVA = async (req: Request, res: Response) => {
                 userId: req.user.id,
               },
             },
-            editionId,
+            edition: {
+              active: true,
+            },
           },
         },
       },
       select: selectedFields,
     });
     if (previousInscription === null) {
-      res.status(200);
-      res.json({ empty: true });
+      res.status(404);
+      res.json({ err: "no prior inscription" });
       return;
     }
     res.status(200);
-    res.json({ empty: false, ...previousInscription });
+    res.json({ ...previousInscription });
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -134,6 +135,9 @@ export const checkVA = async (req: Request, res: Response) => {
         const inscription = await prisma.inscription.findFirst({
           where: {
             athleteId: athlete.id,
+            edition: {
+              active: true,
+            },
             OR: [
               { status: InscriptionStatus.PENDING },
               { status: InscriptionStatus.VALIDATED },
@@ -225,6 +229,9 @@ export const updateVA = async (req: Request, res: Response) => {
         const inscription = await prisma.inscription.findFirst({
           where: {
             athleteId: athlete.id,
+            edition: {
+              active: true,
+            },
             OR: [
               { status: InscriptionStatus.PENDING },
               { status: InscriptionStatus.VALIDATED },
