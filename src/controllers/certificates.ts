@@ -51,7 +51,7 @@ export const getCertificates = async (req: Request, res: Response) => {
     const certificates = await prisma.certificate.findMany({
       skip: req.paginate.skipIndex,
       take: req.paginate.limit + 1,
-      where: req.search,
+      where: { ...req.search, ...req.filter },
       select: selectedFields,
     });
     res.json(jsonPaginateResponse(certificates, req));

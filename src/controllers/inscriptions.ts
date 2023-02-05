@@ -78,6 +78,8 @@ const selectedFields = {
     select: {
       id: true,
       status: true,
+      raceAmount: true,
+      donationAmount: true,
     },
   },
   edition: {
