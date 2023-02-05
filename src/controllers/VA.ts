@@ -8,7 +8,7 @@ const selectedFields = {
   va: true,
   id: true,
   inscription: {
-    select: { 
+    select: {
       athlete: {
         select: {
           user: {
@@ -21,9 +21,9 @@ const selectedFields = {
           firstName: true,
           lastName: true,
         },
-      }
-    }
-  }
+      },
+    },
+  },
 };
 
 export const getVAs = async (req: Request, res: Response) => {
@@ -52,13 +52,13 @@ export const findPreviousVA = async (req: Request, res: Response) => {
         inscription: {
           is: {
             athlete: {
-            is: {
-              userId: req.user.id,
+              is: {
+                userId: req.user.id,
+              },
             },
+            editionId,
           },
-          editionId,
-        }
-        }
+        },
       },
       select: selectedFields,
     });
@@ -243,8 +243,9 @@ export const updateVA = async (req: Request, res: Response) => {
             id: vaId,
           },
           data: {
-            inscriptionId: inscription.id
-          }
+            inscriptionId: inscription.id,
+            va: vaNumber,
+          },
         });
         return res.json(vaUpdate);
       }
