@@ -36,6 +36,18 @@ certificateRouter.get(
   certificateCtrl.getCertificateData
 );
 
+certificateRouter.get(
+  "/certificates/me/last",
+  authenticateJWT,
+  certificateCtrl.findPreviousCertificate
+);
+
+certificateRouter.patch(
+  "/certificates/:id",
+  authenticateJWT,
+  certificateCtrl.updateCertificateInscription
+);
+
 certificateRouter.post(
   "/certificates/:id",
   authenticateJWT,

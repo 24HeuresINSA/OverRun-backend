@@ -271,3 +271,94 @@ export const getCertificateStatus = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const findPreviousCertificate = async (req: Request, res: Response) => {
+  try {
+    const previousCertificate = await prisma.certificate.findFirst({
+      where: {
+        status: { not: 5 },
+        inscription: {
+          is: {
+            edition: {
+              active: true,
+            },
+            athlete: {
+              is: {
+                userId: req.user.id,
+              },
+            },
+          },
+        },
+      },
+      select: selectedFields,
+    });
+
+    if (previousCertificate === null) {
+      res.status(404);
+      res.json({ err: "no prior inscription" });
+      return;
+    }
+
+    res.status(200);
+    res.json(previousCertificate);
+  } catch (err) {
+    console.error(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const updateCertificateInscription = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const certificateId = parseInt(req.params.id);
+
+    const inscription = await prisma.inscription.findFirst({
+      where: {
+        athlete: {
+          is: {
+            userId: req.user.id,
+          },
+        },
+        edition: {
+          active: true,
+        },
+        OR: [
+          { status: InscriptionStatus.PENDING },
+          { status: InscriptionStatus.VALIDATED },
+        ],
+      },
+    });
+
+    if (!inscription) {
+      return res.status(404).json({
+        err: "Inscription not found.",
+      });
+    }
+
+    const certificate = await prisma.certificate.update({
+      where: {
+        id: certificateId,
+      },
+      data: {
+        status: 2,
+        statusUpdatedById: null,
+        statusUpdatedAt: new Date(),
+        inscriptionId: inscription.id,
+      },
+      select: selectedFields,
+    });
+    res.status(200);
+    res.json(certificate);
+  } catch (err) {
+    console.error(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};

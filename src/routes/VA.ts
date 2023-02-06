@@ -24,7 +24,7 @@ vaRouter.get(
   vaCtrl.getVAs
 );
 
-vaRouter.get("/vas/me/last/:editionId", authenticateJWT, vaCtrl.findPreviousVA);
+vaRouter.get("/vas/me/last", authenticateJWT, vaCtrl.findPreviousVA);
 
 vaRouter.post("/checkVA", authenticateJWT, vaCtrl.checkVA);
 
