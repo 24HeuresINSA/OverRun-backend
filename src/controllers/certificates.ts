@@ -345,7 +345,7 @@ export const updateCertificateInscription = async (
         id: certificateId,
       },
       data: {
-        status: 2,
+        status: 4,
         statusUpdatedById: null,
         statusUpdatedAt: new Date(),
         inscriptionId: inscription.id,
