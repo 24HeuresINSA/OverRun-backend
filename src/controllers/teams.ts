@@ -24,7 +24,7 @@ const selectedFields = {
           lastName: true,
         },
       },
-      validated: true,
+      status: true,
     },
   },
   race: {
