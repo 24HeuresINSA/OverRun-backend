@@ -80,6 +80,14 @@ export const getTeamsLight = async (req: Request, res: Response) => {
       select: {
         id: true,
         name: true,
+        race: { select: { category: { select: { maxTeamMembers: true } } } },
+        members: { select: { status: true } },
+        /* better code when prisma >= 4.3.0
+        _count: {
+          select: {
+            members: { where: { status: InscriptionStatus.CANCELLED } },
+          },
+        },*/
       },
     });
     res.json(jsonPaginateResponse(teams, req));
