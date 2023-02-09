@@ -12,6 +12,7 @@ const selectedFields = {
   inscriptions: {
     select: {
       id: true,
+      status: true,
     },
   },
   teams: {

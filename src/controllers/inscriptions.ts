@@ -195,7 +195,33 @@ export const createInscription = async (req: Request, res: Response) => {
         where: {
           id: raceId,
         },
+        select: {
+          id: true,
+          editionId: true,
+          maxParticipants: true,
+          inscriptions: { select: { status: true } },
+        },
       });
+
+      if (race === null) {
+        res.status(400);
+        res.json({
+          err: "Wrong race selection",
+        });
+        return;
+      }
+
+      const inscriptionsNumber = race.inscriptions.filter(
+        (obj) => obj.status !== InscriptionStatus.CANCELLED
+      ).length;
+      if (inscriptionsNumber >= race.maxParticipants) {
+        res.status(403);
+        res.json({
+          err: "Race is full",
+        });
+        return;
+      }
+
       if (race !== null && race.editionId === edition.id) {
         const athlete = await prisma.athlete.findUnique({
           where: {
