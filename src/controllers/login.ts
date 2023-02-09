@@ -128,6 +128,7 @@ export const login = async (req: Request, res: Response) => {
             refreshToken,
             refreshTokenExpiredAt:
               currentDate.getTime() + refreshTokenTimeout * 1000,
+            athleteId,
           });
         } else {
           res.status(400);
