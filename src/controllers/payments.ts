@@ -53,6 +53,7 @@ const selectedFields = {
           id: true,
         },
       },
+      status: true,
     },
   },
 };

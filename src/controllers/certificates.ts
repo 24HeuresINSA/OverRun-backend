@@ -26,6 +26,7 @@ const selectedFields = {
           },
         },
       },
+      status: true,
     },
   },
   uploadedAt: true,
