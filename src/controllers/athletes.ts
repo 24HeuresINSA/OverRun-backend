@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
+import { validationResult } from "express-validator";
 import { prisma, saltRounds } from "../server";
 import { sendEmail } from "../utils/emails";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
@@ -192,6 +193,10 @@ export const getAthleteMe = async (req: Request, res: Response) => {
 };
 
 export const createAthlete = async (req: Request, res: Response) => {
+  const validation = validationResult(req);
+  if (!validation.isEmpty()) {
+    return res.status(400).json({ err: validation.array() });
+  }
   const {
     firstName,
     lastName,
@@ -257,7 +262,18 @@ export const createAthlete = async (req: Request, res: Response) => {
         if (e.code === "P2014") {
           res.status(409);
           res.json({
-            err: "Email or username already exists.",
+            err: "Email already exists.",
+          });
+        } else if (e.code === "P2002") {
+          res.status(403);
+          res.json({
+            err: "Username already exists.",
+          });
+        } else {
+          console.log(e);
+          res.status(500);
+          res.json({
+            err: "Internal error.",
           });
         }
       } else {

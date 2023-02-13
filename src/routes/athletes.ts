@@ -1,5 +1,5 @@
 import express from "express";
-import { body } from "express-validator";
+import { check } from "express-validator";
 import * as athleteCtrl from "../controllers/athletes";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
@@ -91,7 +91,13 @@ athleteRouter.get("/athletes/:id", authenticateJWT, athleteCtrl.getAthleteById);
 
 athleteRouter.post(
   "/athletes",
-  body("email").isEmail().normalizeEmail(normalizeEmailOptions),
+  check("email").isEmail().normalizeEmail(normalizeEmailOptions),
+  check("firstName").isLength({ min: 3 }),
+  check("lastName").isLength({ min: 3 }),
+  check("password").isLength({ min: 8 }),
+  check("dateOfBirth")
+    .toDate()
+    .custom((birthDate) => birthDate <= new Date()),
   athleteCtrl.createAthlete
 );
 
