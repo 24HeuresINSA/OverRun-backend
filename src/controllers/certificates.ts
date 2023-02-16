@@ -17,6 +17,7 @@ const selectedFields = {
           id: true,
           firstName: true,
           lastName: true,
+          dateOfBirth: true,
           user: {
             select: {
               id: true,

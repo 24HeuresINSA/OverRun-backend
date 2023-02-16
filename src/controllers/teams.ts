@@ -22,6 +22,7 @@ const selectedFields = {
           },
           firstName: true,
           lastName: true,
+          dateOfBirth: true,
         },
       },
       status: true,
