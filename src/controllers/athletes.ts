@@ -7,6 +7,10 @@ import { prisma, saltRounds } from "../server";
 import { sendEmail } from "../utils/emails";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 // import { adminInvitationRouter } from "../routes/adminInvitations";
+enum errorMsg {
+  USERNAME_ALREADY_EXISTS = "USERNAME_ALREADY_EXISTS",
+  EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS",
+}
 
 const selectedFields = {
   id: true,
@@ -263,11 +267,13 @@ export const createAthlete = async (req: Request, res: Response) => {
           res.status(409);
           res.json({
             err: "Email already exists.",
+            message: errorMsg.EMAIL_ALREADY_EXISTS,
           });
         } else if (e.code === "P2002") {
-          res.status(403);
+          res.status(409);
           res.json({
             err: "Username already exists.",
+            message: errorMsg.USERNAME_ALREADY_EXISTS,
           });
         } else {
           console.log(e);
