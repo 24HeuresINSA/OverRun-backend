@@ -294,15 +294,25 @@ export const createAthlete = async (req: Request, res: Response) => {
 };
 
 export const updateAthlete = async (req: Request, res: Response) => {
-  console.log(updateAthlete);
   const athleteId = parseInt(req.params.id);
-  const { firstName, lastName, address, zipCode, city, country, phoneNumber } =
-    req.body;
+  const {
+    firstName,
+    lastName,
+    address,
+    zipCode,
+    city,
+    country,
+    phoneNumber,
+    user,
+    sex,
+    dateOfBirth,
+  } = req.body;
   try {
     const athleteData = await prisma.athlete.findUnique({
       where: {
         id: athleteId,
       },
+      select: selectedFields,
     });
     if (req.user.role.includes("ADMIN")) {
       const athlete = await prisma.athlete.update({
@@ -325,7 +335,6 @@ export const updateAthlete = async (req: Request, res: Response) => {
     } else {
       const athlete = await prisma.athlete.update({
         where: {
-          id: athleteId,
           userId: req.user.id,
         },
         data: {
@@ -337,6 +346,19 @@ export const updateAthlete = async (req: Request, res: Response) => {
           country: country !== null ? country : athleteData?.country,
           phoneNumber:
             phoneNumber !== null ? phoneNumber : athleteData?.phoneNumber,
+          sex: sex !== null ? sex : athleteData?.sex,
+          dateOfBirth:
+            dateOfBirth !== null
+              ? new Date(dateOfBirth)
+              : athleteData?.dateOfBirth,
+          user: {
+            update: {
+              username:
+                user.username !== null
+                  ? user.username
+                  : athleteData?.user.username,
+            },
+          },
         },
         select: selectedFields,
       });

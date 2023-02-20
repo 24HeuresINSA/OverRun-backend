@@ -1,5 +1,5 @@
 import express from "express";
-import { check } from "express-validator";
+import { body, check } from "express-validator";
 import * as athleteCtrl from "../controllers/athletes";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
@@ -101,7 +101,12 @@ athleteRouter.post(
   athleteCtrl.createAthlete
 );
 
-athleteRouter.put("/athletes/:id", authenticateJWT, athleteCtrl.updateAthlete);
+athleteRouter.put(
+  "/athletes/:id",
+  authenticateJWT,
+  body("sex").toBoolean(),
+  athleteCtrl.updateAthlete
+);
 
 athleteRouter.delete(
   "/athletes/:id",
