@@ -1,4 +1,5 @@
 import express from "express";
+import { query } from "express-validator";
 import * as teamCtrl from "../controllers/teams";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
@@ -24,6 +25,7 @@ teamRouter.get(
     ],
   ]),
   search([["name", "string", false]]),
+  query("raceId").optional().isNumeric(),
   paginate(),
   teamCtrl.getTeams
 );

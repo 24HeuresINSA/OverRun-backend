@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { Request, Response } from "express";
+import { validationResult } from "express-validator";
 import { prisma } from "../server";
 import {
   getHelloassoCheckoutIntent,
@@ -8,6 +9,7 @@ import {
   initiateHelloassoCheckoutIntent,
 } from "../utils/helloassoProvider";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
+import { InscriptionStatus } from "./inscriptions";
 
 const ONE_MINUTE_IN_MILLISECONDS = 60 * 1000;
 
@@ -98,12 +100,40 @@ function searchingFields(searchString: string): Prisma.PaymentWhereInput {
 }
 
 export const getPayments = async (req: Request, res: Response) => {
+  const validation = validationResult(req);
+  if (!validation.isEmpty()) {
+    return res.status(400).json({ err: validation.array() });
+  }
+
   const searchString = req.query.search as string;
+
+  const paymentStatusCondition = req.query.status as PaymentStatus;
+  const wherePaymentStatus = paymentStatusCondition
+    ? { status: { equals: paymentStatusCondition } }
+    : {};
+
+  const inscriptionStatusCondition = req.query
+    .inscriptionStatus as InscriptionStatus;
+  const whereInscriptionStatus = inscriptionStatusCondition
+    ? { inscription: { status: { equals: inscriptionStatusCondition } } }
+    : {};
+
+  const raceIdCondition = parseInt(req.query.raceId as string);
+  const whereRaceId = raceIdCondition
+    ? { inscription: { raceId: { equals: raceIdCondition } } }
+    : {};
+
   try {
     const payments = await prisma.payment.findMany({
       select: selectedFields,
       orderBy: req.orderBy,
-      where: { ...searchingFields(searchString), ...req.filter },
+      where: {
+        ...searchingFields(searchString),
+        ...req.filter,
+        ...wherePaymentStatus,
+        ...whereInscriptionStatus,
+        ...whereRaceId,
+      },
     });
     res.json(jsonPaginateResponse(payments, req));
   } catch (err) {

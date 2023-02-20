@@ -1,7 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
+import { validationResult } from "express-validator";
 import { prisma } from "../server";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
+import { PaymentStatus } from "./payments";
 
 export enum InscriptionStatus {
   PENDING = "PENDING",
@@ -144,13 +146,40 @@ function searchingFields(searchString: string): Prisma.InscriptionWhereInput {
 }
 
 export const getInscriptions = async (req: Request, res: Response) => {
+  const validation = validationResult(req);
+  if (!validation.isEmpty()) {
+    return res.status(400).json({ err: validation.array() });
+  }
   const searchString = req.query.search as string;
+
+  const certificateStatusCondition = parseInt(
+    req.query.certificateStatus as string
+  );
+  const whereCertificateStatus = certificateStatusCondition
+    ? { certificate: { status: { equals: certificateStatusCondition } } }
+    : {};
+
+  const paymentStatusCondition = req.query.paymentStatus as PaymentStatus;
+  const wherePaymentStatus = paymentStatusCondition
+    ? { payment: { status: { equals: paymentStatusCondition } } }
+    : {};
+
+  const statusCondition = req.query.status as InscriptionStatus;
+  const whereStatus = statusCondition
+    ? { status: { equals: statusCondition } }
+    : {};
+
   try {
     const inscriptions = await prisma.inscription.findMany({
       skip: req.paginate.skipIndex,
       take: req.paginate.limit + 1,
-      // where: Object.assign({}, req.search, req.filter),
-      where: { ...searchingFields(searchString), ...req.filter },
+      where: {
+        ...searchingFields(searchString),
+        ...req.filter,
+        ...whereCertificateStatus,
+        ...wherePaymentStatus,
+        ...whereStatus,
+      },
       select: selectedFields,
     });
     res.json(jsonPaginateResponse(inscriptions, req));

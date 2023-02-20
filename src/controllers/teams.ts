@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
+import { validationResult } from "express-validator";
 import { prisma, saltRounds } from "../server";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 import { InscriptionStatus } from "./inscriptions";
@@ -55,11 +56,21 @@ const selectedFields = {
 };
 
 export const getTeams = async (req: Request, res: Response) => {
+  const validation = validationResult(req);
+  if (!validation.isEmpty()) {
+    return res.status(400).json({ err: validation.array() });
+  }
+
+  const raceIdCondition = parseInt(req.query.raceId as string);
+  const whereRaceId = raceIdCondition
+    ? { race: { id: { equals: raceIdCondition } } }
+    : {};
+
   try {
     const teams = await prisma.team.findMany({
       skip: req.paginate.skipIndex,
       take: req.paginate.limit,
-      where: Object.assign({}, req.search, req.filter),
+      where: { ...req.search, ...req.filter, ...whereRaceId },
       select: selectedFields,
     });
     res.json(jsonPaginateResponse(teams, req));

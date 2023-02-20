@@ -5,6 +5,9 @@ import { authenticateJWT } from "../middlewares/authentication";
 import { filter } from "../middlewares/filter";
 import { paginate } from "../middlewares/pagination";
 import { orderBy } from "../middlewares/orderBy";
+import { PaymentStatus } from "../controllers/payments";
+import { query } from "express-validator";
+import { InscriptionStatus } from "../controllers/inscriptions";
 
 export const paymentRouter = express.Router();
 
@@ -12,6 +15,19 @@ paymentRouter.get(
   "/payments",
   authenticateJWT,
   accessControl(["ADMIN"]),
+  query(
+    "paymentStatus",
+    `Value should be one of : ${Object.values(PaymentStatus)}`
+  )
+    .optional()
+    .isIn(Object.values(PaymentStatus)),
+  query(
+    "inscriptionStatus",
+    `Value should be one of : ${Object.values(InscriptionStatus)}`
+  )
+    .optional()
+    .isIn(Object.values(InscriptionStatus)),
+  query("raceId").optional().isNumeric(),
   filter([
     [["editionId", "id"], "number", true, ["inscription", "edition", "is"]],
   ]),
