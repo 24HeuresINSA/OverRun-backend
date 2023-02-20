@@ -365,6 +365,16 @@ export const updateAthlete = async (req: Request, res: Response) => {
       res.json(athlete);
     }
   } catch (err) {
+    if (err instanceof PrismaClientKnownRequestError) {
+      if (err.code === "P2002") {
+        res.status(409);
+        res.json({
+          err: "Username already exists.",
+          message: errorMsg.USERNAME_ALREADY_EXISTS,
+        });
+        return;
+      }
+    }
     console.error(err);
     res.status(500);
     res.json({
