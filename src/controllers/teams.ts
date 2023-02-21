@@ -132,6 +132,10 @@ export const getTeamById = async (req: Request, res: Response) => {
 };
 
 export const createTeam = async (req: Request, res: Response) => {
+  const validation = validationResult(req);
+  if (!validation.isEmpty()) {
+    return res.status(400).json({ err: validation.array() });
+  }
   const { name, password, raceId, editionId } = req.body;
   bcrypt.hash(password, saltRounds, async (err, hash) => {
     try {
@@ -814,6 +818,10 @@ export const removeTeamMember = async (req: Request, res: Response) => {
 };
 
 export const updateTeamPassword = async (req: Request, res: Response) => {
+  const validation = validationResult(req);
+  if (!validation.isEmpty()) {
+    return res.status(400).json({ err: validation.array() });
+  }
   const { password } = req.body;
   const teamId = parseInt(req.params.id);
   try {

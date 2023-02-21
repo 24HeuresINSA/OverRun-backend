@@ -1,5 +1,5 @@
 import express from "express";
-import { query } from "express-validator";
+import { check, query } from "express-validator";
 import * as teamCtrl from "../controllers/teams";
 import { accessControl } from "../middlewares/accessControl";
 import { authenticateJWT } from "../middlewares/authentication";
@@ -51,7 +51,12 @@ teamRouter.get(
 
 teamRouter.get("/teams/:id", authenticateJWT, teamCtrl.getTeamById);
 
-teamRouter.post("/teams", authenticateJWT, teamCtrl.createTeam);
+teamRouter.post(
+  "/teams",
+  authenticateJWT,
+  check("password").isLength({ min: 8 }),
+  teamCtrl.createTeam
+);
 
 teamRouter.delete(
   "/teams/:id",
@@ -81,5 +86,6 @@ teamRouter.post(
 teamRouter.post(
   "/teams/:id/updatePassword",
   authenticateJWT,
+  check("password").isLength({ min: 8 }),
   teamCtrl.updateTeamPassword
 );
