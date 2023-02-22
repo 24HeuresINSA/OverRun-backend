@@ -39,6 +39,19 @@ paymentRouter.get(
 paymentRouter.get("/payments/me", authenticateJWT, paymentCtrl.getMypayments);
 
 paymentRouter.get(
+  "/payments/count",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paymentCtrl.paymentsByDateToJSON
+);
+paymentRouter.get(
+  "/payments/countInCSV",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paymentCtrl.paymentsByDateToCSV
+);
+
+paymentRouter.get(
   "/payments/:id",
   authenticateJWT,
   accessControl(["ADMIN"]),

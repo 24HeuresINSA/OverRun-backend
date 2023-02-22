@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Edition, Payment, Prisma } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
@@ -539,6 +539,7 @@ export const validatePayment = async (req: Request, res: Response) => {
       data: {
         status: PaymentStatus.VALIDATED,
         helloassoPaymentReceiptUrl: req.body.data.paymentReceiptUrl,
+        date: req.body.data.date,
       },
       select: selectedFields,
     });
@@ -641,6 +642,7 @@ export const setStatusByHelloasso = async (req: Request, res: Response) => {
       },
       data: {
         status: PaymentStatus.VALIDATED,
+        date: helloassoResponse.order.payments[0].date,
       },
       select: selectedFields,
     });
@@ -675,9 +677,153 @@ export const setStatusByHelloasso = async (req: Request, res: Response) => {
       },
       data: {
         status: PaymentStatus.REFUND,
+        date: helloassoResponse.order.payments[0].date,
       },
       select: selectedFields,
     });
     return res.json(payment);
   }
+};
+
+export const paymentsByDateToJSON = async (req: Request, res: Response) => {
+  const editionId = parseInt(req.query.editionId as string);
+
+  try {
+    const edition = await prisma.edition.findUnique({
+      where: {
+        id: editionId,
+      },
+    });
+
+    if (!edition) {
+      res.status(404);
+      return res.json({
+        err: "Edition not found.",
+      });
+    }
+
+    const respo = await paymentsByDate(edition);
+
+    res.json(respo);
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const paymentsByDateToCSV = async (req: Request, res: Response) => {
+  const editionId = parseInt(req.query.editionId as string);
+
+  try {
+    const edition = await prisma.edition.findUnique({
+      where: {
+        id: editionId,
+      },
+    });
+
+    if (!edition) {
+      res.status(404);
+      return res.json({
+        err: "Edition not found.",
+      });
+    }
+
+    const respo = await paymentsByDate(edition);
+
+    let csv =
+      "Date;Montant (en centimes);Don (en centimes);Nom de la course;VA;Statut\n";
+    for (const day of Object.keys(respo)) {
+      for (const payment of respo[day]) {
+        csv += `${day};${payment.raceAmount};${payment.donationAmount};${
+          payment.inscription.race.name
+        };${payment.inscription.va ? "true" : "false"};${payment.status}\n`;
+      }
+    }
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=export.csv");
+    res.send(csv);
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+const paymentsByDate = async (edition: Edition) => {
+  type ReturnData = {
+    [key: string]: {
+      date: Date;
+      raceAmount: number;
+      donationAmount: number;
+      status: string;
+      inscription: {
+        va: {
+          id: number;
+        } | null;
+        race: {
+          id: number;
+          name: string;
+          registrationPrice: number;
+          vaRegistrationPrice: number;
+        };
+      };
+    }[];
+  };
+  const payments = await prisma.payment.findMany({
+    where: {
+      inscription: {
+        editionId: edition.id,
+      },
+      OR: [
+        { status: PaymentStatus.VALIDATED },
+        { status: PaymentStatus.REFUND },
+      ],
+    },
+    select: {
+      date: true,
+      raceAmount: true,
+      donationAmount: true,
+      status: true,
+      inscription: {
+        select: {
+          va: {
+            select: {
+              id: true,
+            },
+          },
+          race: {
+            select: {
+              id: true,
+              name: true,
+              registrationPrice: true,
+              vaRegistrationPrice: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      date: "asc",
+    },
+  });
+
+  const countedPayments = payments.reduce((acc, payment) => {
+    const date = payment.date.toLocaleDateString("fr-FR", {
+      timeZone: "Europe/Paris",
+    });
+    if (!acc[date]) {
+      acc[date] = [payment];
+    } else {
+      acc[date].push(payment);
+    }
+    return acc;
+  }, {} as ReturnData);
+
+  return countedPayments;
 };
