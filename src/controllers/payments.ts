@@ -285,10 +285,37 @@ export const initiatePayment = async (req: Request, res: Response) => {
 
   if (!payment) return res.status(404).json({ err: "Payment not found" });
 
+  const inscription = await prisma.inscription.findUnique({
+    where: {
+      id: payment.inscription.id,
+    },
+    select: {
+      id: true,
+      race: {
+        select: {
+          registrationPrice: true,
+          vaRegistrationPrice: true,
+        },
+      },
+      va: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!inscription)
+    return res.status(500).json({ err: "Inscription associated not found" });
+
   if (payment.status !== PaymentStatus.NOT_STARTED)
     return res.status(409).json({ err: "Payment already initiated" });
 
-  const computedTotalAmount = payment.totalAmount + parseInt(donationAmount);
+  const raceAmount = inscription?.va
+    ? inscription.race.vaRegistrationPrice
+    : inscription.race.registrationPrice;
+
+  const computedTotalAmount = raceAmount + parseInt(donationAmount);
 
   if (computedTotalAmount === 0) {
     const updatedPayment = await prisma.payment.update({
@@ -312,16 +339,16 @@ export const initiatePayment = async (req: Request, res: Response) => {
       payment.id,
       payment.inscription.id,
       computedTotalAmount,
-      payment.raceAmount,
+      raceAmount,
       donationAmount,
       donationAmount > 0 ? true : false,
       {
         firstName: payment.inscription.athlete.firstName,
         lastName: payment.inscription.athlete.lastName,
         email: payment.inscription.athlete.user.email,
-        dateOfBirth: helloassoDateFormater(
-          payment.inscription.athlete.dateOfBirth
-        ),
+        // dateOfBirth: helloassoDateFormater(
+        //   payment.inscription.athlete.dateOfBirth // To uncomment when HelloAsso will fix their API and permit a payment from a minor
+        // ),
         address: payment.inscription.athlete.address,
         city: payment.inscription.athlete.city,
         zipCode: payment.inscription.athlete.zipCode,
@@ -335,6 +362,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
         id: paymentId,
       },
       data: {
+        raceAmount,
         totalAmount: computedTotalAmount,
         donationAmount,
         status: PaymentStatus.PENDING,
@@ -398,6 +426,29 @@ export const updatePayment = async (req: Request, res: Response) => {
 
   if (!payment) return res.status(404).json({ err: "Payment not found" });
 
+  const inscription = await prisma.inscription.findUnique({
+    where: {
+      id: payment.inscription.id,
+    },
+    select: {
+      id: true,
+      race: {
+        select: {
+          registrationPrice: true,
+          vaRegistrationPrice: true,
+        },
+      },
+      va: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!inscription)
+    return res.status(500).json({ err: "Inscription associated not found" });
+
   if (
     payment.status === PaymentStatus.NOT_STARTED ||
     !payment.helloassoCheckoutExpiresAt
@@ -414,8 +465,12 @@ export const updatePayment = async (req: Request, res: Response) => {
   )
     return res.status(409).json({ err: "Payment already initiated" });
 
+  const raceAmount = inscription?.va
+    ? inscription.race.vaRegistrationPrice
+    : inscription.race.registrationPrice;
+
   const computedTotalAmount =
-    payment.raceAmount +
+    raceAmount +
     parseInt(
       donationAmount || donationAmount === 0
         ? donationAmount
@@ -427,16 +482,16 @@ export const updatePayment = async (req: Request, res: Response) => {
       payment.id,
       payment.inscription.id,
       computedTotalAmount,
-      payment.raceAmount,
+      raceAmount,
       donationAmount,
       donationAmount > 0 ? true : false,
       {
         firstName: payment.inscription.athlete.firstName,
         lastName: payment.inscription.athlete.lastName,
         email: payment.inscription.athlete.user.email,
-        dateOfBirth: helloassoDateFormater(
-          payment.inscription.athlete.dateOfBirth
-        ),
+        // dateOfBirth: helloassoDateFormater(
+        //   payment.inscription.athlete.dateOfBirth // To uncomment when HelloAsso will fix their API and permit a payment from a minor
+        // ),
         address: payment.inscription.athlete.address,
         city: payment.inscription.athlete.city,
         zipCode: payment.inscription.athlete.zipCode,
@@ -450,6 +505,7 @@ export const updatePayment = async (req: Request, res: Response) => {
         id: paymentId,
       },
       data: {
+        raceAmount,
         totalAmount: computedTotalAmount,
         donationAmount,
         status: PaymentStatus.PENDING,

@@ -11,7 +11,7 @@ export interface HelloassoPayer {
   firstName: string;
   lastName: string;
   email: string;
-  dateOfBirth: string;
+  // dateOfBirth: string; // To uncomment when HelloAsso will fix their API and permit a payment from a minor
   address: string;
   city: string;
   zipCode: string;
