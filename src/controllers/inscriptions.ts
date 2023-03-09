@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { prisma } from "../server";
+import { sendEmail } from "../utils/emails";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 import { PaymentStatus } from "./payments";
 
@@ -389,6 +390,14 @@ export const validateInscription = async (req: Request, res: Response) => {
       },
       select: selectedFields,
     });
+    sendEmail(
+      inscription.athlete.user.email,
+      "Validation de votre inscription",
+      "ValidateInscription",
+      {
+        firstName: inscription.athlete.firstName,
+      }
+    );
     res.json(inscription);
   } catch (err) {
     console.log(err);

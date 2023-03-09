@@ -1,0 +1,12 @@
+Bonjour {{ firstName }},
+
+L'équipe des courses des 24 heures de l'INSA a le plaisir de vous annoncer que votre inscription vient d'être validée. 🎉
+Si vous avez besoin d'accéder au campus en voiture le jour de l'évènement, vous pouvez nous contacter en réponse à ce mail. 
+Nous vous ferons ensuite parvenir la procédure pour obtenir un laissez passer.
+
+Nous avons hâte de vous retrouver en mai ! 😊
+
+Pour toute question, n'hésitez pas à nous contacter en réponse à ce mail.
+
+Excellente journée,
+L'équipe des courses des 24 heures de l'INSA
