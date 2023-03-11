@@ -39,13 +39,13 @@ paymentRouter.get(
 paymentRouter.get("/payments/me", authenticateJWT, paymentCtrl.getMypayments);
 
 paymentRouter.get(
-  "/payments/count",
+  "/payments/export",
   authenticateJWT,
   accessControl(["ADMIN"]),
   paymentCtrl.paymentsByDateToJSON
 );
 paymentRouter.get(
-  "/payments/countInCSV",
+  "/payments/exportInCSV",
   authenticateJWT,
   accessControl(["ADMIN"]),
   paymentCtrl.paymentsByDateToCSV
