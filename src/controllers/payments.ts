@@ -136,7 +136,11 @@ export const getAmountByDate = async (req: Request, res: Response) => {
       where: {
         inscription: {
           editionId: editionId,
+          NOT: {
+            status: InscriptionStatus.CANCELLED,
+          },
         },
+        status: PaymentStatus.VALIDATED,
       },
       select: {
         date: true,
