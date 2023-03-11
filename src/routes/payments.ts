@@ -36,7 +36,21 @@ paymentRouter.get(
   paymentCtrl.getPayments
 );
 
+paymentRouter.get(
+  "/payment/amountByDate",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paymentCtrl.getAmountByDate
+);
+
 paymentRouter.get("/payments/me", authenticateJWT, paymentCtrl.getMypayments);
+
+paymentRouter.get(
+  "/payments/total",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  paymentCtrl.getTotalPayments
+);
 
 paymentRouter.get(
   "/payments/export",

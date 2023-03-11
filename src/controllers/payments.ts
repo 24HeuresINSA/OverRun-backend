@@ -99,6 +99,121 @@ function searchingFields(searchString: string): Prisma.PaymentWhereInput {
   };
 }
 
+export const getTotalPayments = async (req: Request, res: Response) => {
+  const editionId = parseInt(req.query.editionId as string);
+  try {
+    const totals = await prisma.payment.groupBy({
+      by: ["status"],
+      where: {
+        inscription: {
+          editionId: editionId,
+          NOT: {
+            status: InscriptionStatus.CANCELLED,
+          },
+        },
+        status: PaymentStatus.VALIDATED,
+      },
+      _sum: {
+        donationAmount: true,
+        raceAmount: true,
+      },
+    });
+
+    res.json(totals);
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
+export const getAmountByDate = async (req: Request, res: Response) => {
+  try {
+    const editionId = parseInt(req.query.edition as string);
+    const sumResponse = await prisma.payment.findMany({
+      where: {
+        inscription: {
+          editionId: editionId,
+        },
+      },
+      select: {
+        date: true,
+        raceAmount: true,
+        donationAmount: true,
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    const sumPerDate = sumResponse.reduce(
+      (acc, current) => {
+        const date = current.date.toLocaleDateString("en-US");
+        if (!acc.race[date]) acc.race[date] = 0;
+        if (!acc.donation[date]) acc.donation[date] = 0;
+        acc.race[date] += current.raceAmount;
+        if (current.donationAmount)
+          acc.donation[date] += current.donationAmount;
+        return acc;
+      },
+      { race: {}, donation: {} } as {
+        race: { [key1: string]: number };
+        donation: { [key2: string]: number };
+      }
+    );
+
+    const labels = Object.keys(sumPerDate.race);
+    const simpleRace = Object.values(sumPerDate.race);
+    const simpleDonation = Object.values(sumPerDate.donation);
+
+    for (let index = 0; index < labels.length - 1; index++) {
+      const date1 = new Date(labels[index]);
+      const date2 = new Date(labels[index + 1]);
+      const tomorrow = new Date(date1.setHours(date1.getHours() + 24));
+      if (date2.getTime() !== tomorrow.getTime()) {
+        labels.splice(index + 1, 0, tomorrow.toLocaleDateString("en-US"));
+        simpleRace.splice(index + 1, 0, 0);
+        simpleDonation.splice(index + 1, 0, 0);
+      }
+    }
+
+    const cumulativeRace = simpleRace.reduce((acc, current) => {
+      if (acc.length > 0) {
+        acc.push(current + acc[acc.length - 1]);
+      } else {
+        acc.push(current);
+      }
+      return acc;
+    }, [] as number[]);
+    const cumulativeDonation = simpleDonation.reduce((acc, current) => {
+      if (acc.length > 0) {
+        acc.push(current + acc[acc.length - 1]);
+      } else {
+        acc.push(current);
+      }
+      return acc;
+    }, [] as number[]);
+
+    res.json({
+      labels,
+      data: {
+        simpleRace,
+        cumulativeRace,
+        simpleDonation,
+        cumulativeDonation,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
 export const getPayments = async (req: Request, res: Response) => {
   const validation = validationResult(req);
   if (!validation.isEmpty()) {

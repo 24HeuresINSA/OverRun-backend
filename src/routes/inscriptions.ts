@@ -42,6 +42,20 @@ inscriptionRouter.get(
 );
 
 inscriptionRouter.get(
+  "/inscriptions/countLast24h",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  inscriptionCtrl.getLast24hInscriptions
+);
+
+inscriptionRouter.get(
+  "/inscriptions/countByDate",
+  authenticateJWT,
+  accessControl(["ADMIN"]),
+  inscriptionCtrl.getCountByDate
+);
+
+inscriptionRouter.get(
   "/inscriptions/:id",
   authenticateJWT,
   accessControl(["ADMIN"]),

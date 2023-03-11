@@ -145,6 +145,75 @@ function searchingFields(searchString: string): Prisma.InscriptionWhereInput {
   };
 }
 
+export const getLast24hInscriptions = async (req: Request, res: Response) => {
+  const yesterday = new Date();
+  yesterday.setHours(yesterday.getHours() - 24);
+  const lastInscriptions = await prisma.inscription.count({
+    where: {
+      createdAt: {
+        gte: yesterday,
+      },
+    },
+  });
+  res.json(lastInscriptions);
+};
+
+export const getCountByDate = async (req: Request, res: Response) => {
+  try {
+    const editionId = parseInt(req.query.edition as string);
+    const countResponse = await prisma.inscription.findMany({
+      where: {
+        editionId: editionId,
+      },
+      select: {
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+    const countPerDate = countResponse.reduce((acc, current) => {
+      const date = current.createdAt.toLocaleDateString("en-US");
+      if (!acc[date]) acc[date] = 0;
+      acc[date]++;
+      return acc;
+    }, {} as { [key: string]: number });
+
+    const labels = Object.keys(countPerDate);
+    const simple = Object.values(countPerDate);
+
+    for (let index = 0; index < labels.length - 1; index++) {
+      const date1 = new Date(labels[index]);
+      const date2 = new Date(labels[index + 1]);
+      const tomorrow = new Date(date1.setHours(date1.getHours() + 24));
+      if (date2.getTime() !== tomorrow.getTime()) {
+        labels.splice(index + 1, 0, tomorrow.toLocaleDateString("en-US"));
+        simple.splice(index + 1, 0, 0);
+      }
+    }
+
+    const cumulative = simple.reduce((acc, current) => {
+      if (acc.length > 0) {
+        acc.push(current + acc[acc.length - 1]);
+      } else {
+        acc.push(current);
+      }
+      return acc;
+    }, [] as number[]);
+
+    res.json({
+      labels,
+      data: { simple, cumulative },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.json({
+      err: "Internal error.",
+    });
+  }
+};
+
 export const getInscriptions = async (req: Request, res: Response) => {
   const validation = validationResult(req);
   if (!validation.isEmpty()) {
