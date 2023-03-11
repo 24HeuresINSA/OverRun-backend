@@ -1,0 +1,86 @@
+<body style="font-family: Roboto, sans-serif !important">
+  <div
+    id="header"
+    class="bar"
+    style="padding: 20px; background-color: #2b3180"
+  ></div>
+
+  <div id="main" style="padding: 20px">
+    <p>Bonjour {{ firstName }},</p>
+
+    <p>
+      L'équipe des courses des 24 heures de l'INSA a le regret de vous annoncer que votre inscription vient d'être annulée. 😢<br />
+      Vous pouvez vous connectez à votre compte pour procéder à une nouvelle inscription. <br />
+      Pour vous connecter, cliquez sur le bouton ci-dessous : 
+    </p>
+    <br />
+      <a
+      id="link-button"
+      href="{{ url }}/login"
+      target="_blank"
+      style="
+        background-color: #2b3180;
+        padding: 1rem 1rem 1rem 1rem;
+        border-radius: 0.5rem;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        margin: 1rem;
+      "
+      >Me connecter</a
+      >
+    </p>
+    <p>
+      Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier-coller le lien suivant dans votre navigateur : <br/>
+      <a href="{{ url }}/login">{{ url }}/login</a>
+    </p>
+
+    <p> 
+      Pour toute question, n'hésitez pas à nous contacter en réponse à ce mail.
+    </p>
+
+    <p>
+      Excellente journée,
+      L'équipe des courses des 24 heures de l'INSA
+    </p>
+  </div>
+
+  <div
+    id="footer"
+    class="bar"
+    style="
+      padding: 10px;
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      line-height: 10px;
+      font-weight: 400;
+      background-color: #2b3180
+    "
+  >
+    <img
+      src="https://www.24heures.org/wp-content/uploads/2022/01/logo_24h_generique_couleur_blanc_sf.png"
+      alt="24 heures de l'INSA Logo"
+      width="50"
+      height="50"
+    >
+    </img>
+
+    <p>
+      © 2023
+      <a
+        href="https://www.24heures.org/"
+        style="
+          text-decoration: none;
+          outline: none;
+          color: white;
+          font-size: 16px;
+        "
+        ><strong>Les 24 heures de l'INSA</strong></a
+      >
+      .
+    </p>
+
+    <p>Tous droits reservés.</p>
+  </div>
+</body>

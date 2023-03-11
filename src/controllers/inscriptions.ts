@@ -420,6 +420,15 @@ export const cancelInscription = async (req: Request, res: Response) => {
       },
       select: selectedFields,
     });
+    sendEmail(
+      inscription.athlete.user.email,
+      "Annulation de votre inscription",
+      "CancelInscription",
+      {
+        firstName: inscription.athlete.firstName,
+        url: process.env.FRONTEND_URL,
+      }
+    );
     res.json(inscription);
   } catch (err) {
     console.log(err);

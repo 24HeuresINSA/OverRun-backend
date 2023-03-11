@@ -1,0 +1,11 @@
+Bonjour {{ firstName }},
+
+L'équipe des courses des 24 heures de l'INSA a le regret de vous annoncer que votre inscription vient d'être annulée. 😢
+Vous pouvez vous connectez à votre compte pour procéder à une nouvelle inscription. <br />
+Pour vous connecter, cliquez sur le lien ci-dessous : 
+{{ url }}/login
+
+Pour toute question, n'hésitez pas à nous contacter en réponse à ce mail.
+
+Excellente journée,
+L'équipe des courses des 24 heures de l'INSA
