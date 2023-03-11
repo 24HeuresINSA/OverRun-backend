@@ -472,6 +472,9 @@ export const initiatePayment = async (req: Request, res: Response) => {
       req.headers.authorization?.slice(7) as string
     );
 
+    if (helloassoCheckoutIntent?.errors)
+      return res.status(500).json(helloassoCheckoutIntent);
+
     const updatedPayment = await prisma.payment.update({
       where: {
         id: paymentId,
@@ -592,6 +595,26 @@ export const updatePayment = async (req: Request, res: Response) => {
         : payment.donationAmount
     );
 
+  if (computedTotalAmount === 0) {
+    const updatedPayment = await prisma.payment.update({
+      where: {
+        id: paymentId,
+      },
+      data: {
+        totalAmount: computedTotalAmount,
+        donationAmount,
+        helloassoCheckoutIntentId: null,
+        helloassoCheckoutIntentUrl: null,
+        helloassoCheckoutExpiresAt: null,
+        status: PaymentStatus.VALIDATED,
+      },
+      select: selectedFields,
+    });
+
+    res.json(updatedPayment);
+    return;
+  }
+
   try {
     const helloassoCheckoutIntent = await initiateHelloassoCheckoutIntent(
       payment.id,
@@ -614,6 +637,9 @@ export const updatePayment = async (req: Request, res: Response) => {
       },
       req.headers.authorization?.slice(7) as string
     );
+
+    if (helloassoCheckoutIntent?.errors)
+      return res.status(500).json(helloassoCheckoutIntent);
 
     const updatedPayment = await prisma.payment.update({
       where: {

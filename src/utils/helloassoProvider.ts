@@ -60,6 +60,7 @@ export interface HelloassoCheckoutIntent {
   redirectUrl: string;
   metadata: object;
   order: HelloassoOrder;
+  errors?: object[];
 }
 
 export enum HelloassoEventType {
