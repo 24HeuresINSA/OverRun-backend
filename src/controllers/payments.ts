@@ -1,5 +1,5 @@
 import { Edition, Payment, Prisma } from "@prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { prisma } from "../server";
@@ -360,7 +360,7 @@ export const createPayment = async (req: Request, res: Response) => {
     console.log(err);
     res.status(500);
     res.json({
-      err: "Internal error.",
+      err: "Internal error.....",
     });
   }
 };
