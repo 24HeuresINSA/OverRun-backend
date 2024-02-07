@@ -131,7 +131,7 @@ model Discipline {
 
 model Race {
   id                  Int              @id @default(autoincrement())
-  name                String           @unique
+  name                String           
   registrationPrice   Float
   vaRegistrationPrice Float
   maxParticipants     Int
@@ -143,6 +143,8 @@ model Race {
   teams               Team[]
   edition             Edition          @relation(fields: [editionId], references: [id], onDelete: Cascade)
   editionId           Int
+
+  @@unique([name,editionId])
 }
 
 model RaceDiscipline {
@@ -198,7 +200,7 @@ model Payment {
 
 model Team {
   id        Int           @id @default(autoincrement())
-  name      String        @unique @db.VarChar(50)
+  name      String        @db.VarChar(50)
   password  String        @db.VarChar(255)
   members   Inscription[]
   race      Race          @relation(fields: [raceId], references: [id])
@@ -206,6 +208,8 @@ model Team {
   admins    TeamAdmin[]
   edition   Edition       @relation(fields: [editionId], references: [id], onDelete: Cascade)
   editionId Int
+
+  @@unique([name, editionId])
 }
 
 model TeamAdmin {
