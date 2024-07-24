@@ -56,6 +56,11 @@ const selectedFields = {
           id: true,
         },
       },
+      va: {
+        select: {
+          id: true,
+        },
+      },
       status: true,
     },
   },
