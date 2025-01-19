@@ -95,20 +95,20 @@ export const checkVA = async (req: Request, res: Response) => {
     if (tokenResponse.status < 300) {
       const accessToken = tokenResponse.data.access_token;
 
-      const vaResponse = await axios.post(
+      const vaResponse = await axios.get(
         `${process.env.EDB_VA_ENDPOINT}/va_check`,
         {
-          last_name: vaLastName,
-          first_name: vaFirstName,
-          card: vaNumber,
-        },
-        {
+          params: {
+            // last_name: vaLastName,
+            // first_name: vaFirstName,
+            card_number: vaNumber,
+          },
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
         }
       );
+
       if (vaResponse.status === 404 || vaResponse.status === 400) {
         res.status(404);
         return res.json({
@@ -116,9 +116,13 @@ export const checkVA = async (req: Request, res: Response) => {
         });
       }
 
+      const memberships = vaResponse.data.members[0].memberships?.map(
+        ({ name }: { name: string }) => name
+      );
       if (
         vaResponse.status === 200 &&
-        vaResponse.data.has_valid_membership === true
+        vaResponse.data.members.length > 0 &&
+        memberships.includes("VAvantages 2024-25")
       ) {
         const athlete = await prisma.athlete.findUnique({
           where: {
@@ -189,16 +193,15 @@ export const updateVA = async (req: Request, res: Response) => {
     if (tokenResponse.status < 300) {
       const accessToken = tokenResponse.data.access_token;
 
-      const vaResponse = await axios.post(
+      const vaResponse = await axios.get(
         `${process.env.EDB_VA_ENDPOINT}/va_check`,
         {
-          last_name: vaLastName,
-          first_name: vaFirstName,
-          card: vaNumber,
-        },
-        {
+          params: {
+            // last_name: vaLastName,
+            // first_name: vaFirstName,
+            card_number: vaNumber,
+          },
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
         }
@@ -209,10 +212,13 @@ export const updateVA = async (req: Request, res: Response) => {
           err: "VA not found.",
         });
       }
-
+      const memberships = vaResponse.data.members[0].memberships?.map(
+        ({ name }: { name: string }) => name
+      );
       if (
         vaResponse.status === 200 &&
-        vaResponse.data.has_valid_membership === true
+        vaResponse.data.members.length > 0 &&
+        memberships.includes("VAvantages 2024-25")
       ) {
         const athlete = await prisma.athlete.findUnique({
           where: {
