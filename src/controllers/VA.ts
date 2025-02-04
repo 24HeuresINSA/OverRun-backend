@@ -116,14 +116,17 @@ export const checkVA = async (req: Request, res: Response) => {
         });
       }
 
+      if (vaResponse.data.members.length === 0) {
+        return res.status(404).json({
+          err: "VA not found.",
+        });
+      }
+
       const memberships = vaResponse.data.members[0].memberships?.map(
         ({ name }: { name: string }) => name
       );
-      if (
-        vaResponse.status === 200 &&
-        vaResponse.data.members.length > 0 &&
-        memberships.includes("VAvantages 2024-25")
-      ) {
+
+      if (memberships.includes("VAvantages 2024-25")) {
         const athlete = await prisma.athlete.findUnique({
           where: {
             userId: req.user.id,
@@ -212,14 +215,18 @@ export const updateVA = async (req: Request, res: Response) => {
           err: "VA not found.",
         });
       }
+
+      if (vaResponse.data.members.length === 0) {
+        return res.status(404).json({
+          err: "VA not found.",
+        });
+      }
+
       const memberships = vaResponse.data.members[0].memberships?.map(
         ({ name }: { name: string }) => name
       );
-      if (
-        vaResponse.status === 200 &&
-        vaResponse.data.members.length > 0 &&
-        memberships.includes("VAvantages 2024-25")
-      ) {
+
+      if (memberships.includes("VAvantages 2024-25")) {
         const athlete = await prisma.athlete.findUnique({
           where: {
             userId: req.user.id,
