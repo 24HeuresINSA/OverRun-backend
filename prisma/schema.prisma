@@ -193,9 +193,9 @@ model Payment {
   totalAmount                Int
   status                     PaymentStatus @default(PENDING)
   helloassoCheckoutIntentId  Int?          @unique
-  helloassoCheckoutIntentUrl String?       @db.VarChar(255)
+  helloassoCheckoutIntentUrl String?       @db.Text
   helloassoCheckoutExpiresAt DateTime?
-  helloassoPaymentReceiptUrl String?       @db.VarChar(255)
+  helloassoPaymentReceiptUrl String?       @db.Text
 }
 
 model Team {
