@@ -4,6 +4,12 @@ import { prisma } from "../server";
 import { jsonPaginateResponse } from "../utils/jsonResponseFormater";
 import { InscriptionStatus } from "./inscriptions";
 
+const allowedAdhesions = [
+  "VA 1A 2024-25",
+  "VAvantages 2024-25",
+  "VAdhésion + VAvantages 2024-25",
+];
+
 const selectedFields = {
   va: true,
   id: true,
@@ -126,7 +132,9 @@ export const checkVA = async (req: Request, res: Response) => {
         ({ name }: { name: string }) => name
       );
 
-      if (memberships.includes("VAvantages 2024-25")) {
+      //La liste des adhésions de l'utilisateur contient au moins
+      //une adhésion qui offre des réductions.
+      if (memberships.some((m: string) => allowedAdhesions.includes(m))) {
         const athlete = await prisma.athlete.findUnique({
           where: {
             userId: req.user.id,
@@ -226,7 +234,9 @@ export const updateVA = async (req: Request, res: Response) => {
         ({ name }: { name: string }) => name
       );
 
-      if (memberships.includes("VAvantages 2024-25")) {
+      //La liste des adhésions de l'utilisateur contient au moins
+      //une adhésion qui offre des réductions.
+      if (memberships.some((m: string) => allowedAdhesions.includes(m))) {
         const athlete = await prisma.athlete.findUnique({
           where: {
             userId: req.user.id,
