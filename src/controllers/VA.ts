@@ -90,14 +90,20 @@ export const checkVA = async (req: Request, res: Response) => {
 
   try {
     const tokenResponse = await axios.post(
-      ` ${process.env.EDB_SSO_ENDPOINT}/auth/realms/${process.env.EDB_REALM}/protocol/openid-connect/token`,
-      `grant_type=client_credentials&client_id=${process.env.EDB_VA_CLIENT_ID}&client_secret=${process.env.EDB_VA_TOKEN}`,
+      ` ${process.env.EDB_SSO_ENDPOINT}/realms/${process.env.EDB_REALM}/protocol/openid-connect/token`,
+      `grant_type=client_credentials&client_id=${process.env.EDB_VA_CLIENT_ID}&client_secret=${process.env.EDB_VA_TOKEN}&scope=openid`,
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
+
+    if (tokenResponse.status === 404)
+      return res
+        .status(500)
+        .json({ err: "Erreur de communication avec le serveur de la VA" });
+
     if (tokenResponse.status < 300) {
       const accessToken = tokenResponse.data.access_token;
 
@@ -193,14 +199,20 @@ export const updateVA = async (req: Request, res: Response) => {
 
   try {
     const tokenResponse = await axios.post(
-      ` ${process.env.EDB_SSO_ENDPOINT}/auth/realms/${process.env.EDB_REALM}/protocol/openid-connect/token`,
-      `grant_type=client_credentials&client_id=${process.env.EDB_VA_CLIENT_ID}&client_secret=${process.env.EDB_VA_TOKEN}`,
+      ` ${process.env.EDB_SSO_ENDPOINT}/realms/${process.env.EDB_REALM}/protocol/openid-connect/token`,
+      `grant_type=client_credentials&client_id=${process.env.EDB_VA_CLIENT_ID}&client_secret=${process.env.EDB_VA_TOKEN}&scope=openid`,
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
+
+    if (tokenResponse.status === 404)
+      return res
+        .status(500)
+        .json({ err: "Erreur de communication avec le serveur de la VA" });
+
     if (tokenResponse.status < 300) {
       const accessToken = tokenResponse.data.access_token;
 
