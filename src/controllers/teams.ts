@@ -92,7 +92,9 @@ export const getTeamsLight = async (req: Request, res: Response) => {
       select: {
         id: true,
         name: true,
-        race: { select: { category: { select: { maxTeamMembers: true } } } },
+        race: {
+          select: { id: true, category: { select: { maxTeamMembers: true } } },
+        },
         members: { select: { status: true } },
         /* better code when prisma >= 4.3.0
         _count: {
