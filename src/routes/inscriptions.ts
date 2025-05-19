@@ -37,7 +37,7 @@ inscriptionRouter.get(
     [["editionId", "id"], "number", true, ["edition", "is"]],
     [["raceId", "id"], "number", true, ["race", "is"]],
   ]),
-  paginate(),
+  paginate(2_500),
   inscriptionCtrl.getInscriptions
 );
 
